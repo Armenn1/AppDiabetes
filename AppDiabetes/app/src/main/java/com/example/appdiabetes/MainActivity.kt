@@ -114,12 +114,12 @@ fun GlucoseSection(hasData: Boolean) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    Text("Última medición: 10:35 AM")
+                    Text("Último registro: 10:35 AM")
                 } else {
                     Button(onClick = { /* TODO: Abrir pantalla para añadir dato */ }) {
                         Icon(Icons.Default.Add, contentDescription = null)
                         Spacer(Modifier.width(4.dp))
-                        Text("Añadir dato")
+                        Text("Nuevo registro")
                     }
                 }
             }
@@ -177,7 +177,7 @@ fun TipsCarouselSection() {
         // Datos de ejemplo para el carrusel
         val items = listOf(
             "Receta: Ensalada saludable",
-            "Tip: Medir glucosa post-ejercicio",
+            "Tips: Evitar picos de glucosa",
             "Blog: Nuevas tecnologías"
         )
         LazyRow(
