@@ -1,0 +1,55 @@
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:padding="24dp">
+
+    <Button
+        android:id="@+id/btnVolver"
+        android:text="← Volver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#E0E0E0"
+        android:textColor="#000000"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+    android:text="Calculadora de bolo"
+    android:textSize="22sp"
+    android:textStyle="bold"
+    android:layout_marginBottom="20dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+<EditText
+    android:id="@+id/inputGlucosa"
+    android:hint="Glucosa (mg/dL)"
+    android:inputType="number"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+
+<EditText
+    android:id="@+id/inputRacion"
+    android:hint="Raciones de hidratos"
+    android:inputType="numberDecimal"
+    android:layout_marginTop="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+
+<Button
+    android:id="@+id/btnCalcular"
+    android:text="Calcular bolo"
+    android:layout_marginTop="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+
+<TextView
+    android:id="@+id/resultBolo"
+    android:text="Resultado"
+    android:textSize="18sp"
+    android:layout_marginTop="20dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+</LinearLayout>
