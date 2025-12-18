@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TFGDIABETESAPP">
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".BoloActivity"
             android:exported="false" />
         <activity
