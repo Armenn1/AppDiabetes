@@ -70,18 +70,27 @@
         </LinearLayout>
 
         <!-- INSULINAS -->
+
+    <!-- INSULINAS -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Fila 1: rápida y lenta -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
+            android:orientation="horizontal">
 
+            <!-- Insulina rápida -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/bg_card"
-                android:elevation="6dp"
+                android:elevation="3dp"
                 android:padding="12dp"
                 android:orientation="vertical"
                 android:layout_marginEnd="8dp">
@@ -89,7 +98,7 @@
                 <TextView
                     android:text="12 Unidades"
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
@@ -101,12 +110,13 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
+            <!-- Insulina lenta -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/bg_card"
-                android:elevation="6dp"
+                android:elevation="3dp"
                 android:padding="12dp"
                 android:orientation="vertical"
                 android:layout_marginStart="8dp">
@@ -114,7 +124,7 @@
                 <TextView
                     android:text="22 Unidades"
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
@@ -127,6 +137,35 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <!-- Fila 2: Insulina activa (IOB) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card"
+            android:elevation="3dp"
+            android:padding="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textIOB"
+                android:text="0.0 Unidades"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Insulina activa en el cuerpo"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
 
         <!-- BOTÓN CALCULAR BOLO -->
         <Button
