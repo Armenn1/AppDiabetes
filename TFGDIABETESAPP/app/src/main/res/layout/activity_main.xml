@@ -9,29 +9,32 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- HEADER -->
-        <LinearLayout
+        <!-- HEADER CON BOTÓN DE AJUSTES -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#4DA3FF"
-            android:padding="16dp"
-            android:orientation="horizontal">
+            android:padding="16dp">
 
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
                 android:text="RC Diabetes Monitor"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+                android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btnSettings"
-            android:text="Ajustes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"/>
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Ajustes"
+                android:src="@android:drawable/ic_menu_preferences"
+                />
+        </RelativeLayout>
 
 
         <!-- TARJETA GLUCOSA -->
