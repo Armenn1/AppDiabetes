@@ -5,66 +5,86 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    android:background="#F5F5F5"
+    tools:context=".RegisterActivity">
+
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Volver"
+        android:src="@android:drawable/ic_menu_revert"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#333333" />
 
     <LinearLayout
-        android:layout_width="409dp"
-        android:layout_height="729dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="1dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Crea tu cuenta"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_gravity="center"
+            android:layout_marginBottom="32dp"/>
+
         <EditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:ems="10"
+            android:layout_height="55dp"
+            android:background="@android:drawable/editbox_background"
             android:hint="Email"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:paddingHorizontal="16dp" />
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="20dp" />
+            android:layout_height="16dp" />
 
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:ems="10"
+            android:layout_height="55dp"
+            android:background="@android:drawable/editbox_background"
             android:hint="Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:paddingHorizontal="16dp" />
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="20dp" />
+            android:layout_height="32dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Space
-                android:layout_width="2dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
             <Button
                 android:id="@+id/btnRegister"
-                android:layout_width="272dp"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="55dp"
                 android:layout_weight="1"
-                android:text="Register" />
+                android:backgroundTint="#6200EE"
+                android:text="Register"
+                android:textColor="#FFFFFF" />
 
             <Space
-                android:layout_width="2dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_width="12dp"
+                android:layout_height="wrap_content" />
+
         </LinearLayout>
     </LinearLayout>
 

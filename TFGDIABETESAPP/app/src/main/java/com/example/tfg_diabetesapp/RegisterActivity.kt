@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import android.widget.Button
 import android.widget.EditText
 import android.content.Intent
+import android.widget.ImageButton
 import android.widget.Toast
 
 
@@ -41,5 +42,9 @@ class RegisterActivity : AppCompatActivity() {
                 }
         }
 
+        val btnBack = findViewById<ImageButton>(R.id.btnBack)
+        btnBack.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
     }
 }
