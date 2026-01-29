@@ -1,235 +1,283 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="#F5F5F5"
+    tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:padding="24dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- HEADER CON BOTÓN DE AJUSTES -->
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="#4DA3FF"
-            android:padding="16dp">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:text="RC Diabetes Monitor"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageButton
-                android:id="@+id/btnSettings"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Ajustes"
-                android:src="@android:drawable/ic_menu_preferences"
-                />
-        </RelativeLayout>
-
-
-        <!-- TARJETA GLUCOSA -->
-        <LinearLayout
-            android:layout_margin="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_card"
-            android:elevation="6dp"
-            android:padding="16dp"
-            android:orientation="vertical">
+                android:text="Hola, Roc"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:textColor="#333333"/>
 
             <TextView
-                android:text="Nivel de glucosa actual"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Estado actual"
                 android:textSize="14sp"
-                android:textColor="#555555"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="110 mg/dl"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:textColor="#4CAF50"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="Última lectura: 10:34"
-                android:textSize="12sp"
-                android:textColor="#888888"
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="#757575"/>
         </LinearLayout>
 
-        <!-- INSULINAS -->
+        <ImageButton
+            android:id="@+id/btnLogout"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_lock_power_off"
+            app:tint="#D32F2F"
+            android:contentDescription="Cerrar Sesión" />
+    </LinearLayout>
 
-    <!-- INSULINAS -->
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
-        <!-- Fila 1: rápida y lenta -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="24dp">
 
-            <!-- Insulina rápida -->
-            <LinearLayout
-                android:layout_width="0dp"
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/bg_card"
-                android:elevation="3dp"
-                android:padding="12dp"
-                android:orientation="vertical"
-                android:layout_marginEnd="8dp">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_marginBottom="16dp">
 
-                <TextView
-                    android:text="12 Unidades"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center">
 
-                <TextView
-                    android:text="Insulina rápida"
-                    android:textSize="12sp"
-                    android:textColor="#666666"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Glucosa Estimada"
+                        android:textColor="#757575"
+                        android:textSize="14sp"/>
 
-            <!-- Insulina lenta -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="bottom">
+
+                        <TextView
+                            android:id="@+id/tvGlucosaMain"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="115"
+                            android:textColor="#333333"
+                            android:textSize="56sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" mg/dL"
+                            android:textColor="#757575"
+                            android:textSize="18sp"
+                            android:layout_marginBottom="12dp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="● En Rango"
+                        android:textColor="#4CAF50"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/bg_card"
-                android:elevation="3dp"
-                android:padding="12dp"
-                android:orientation="vertical"
-                android:layout_marginStart="8dp">
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
 
-                <TextView
-                    android:text="22 Unidades"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    android:layout_marginEnd="8dp">
 
-                <TextView
-                    android:text="Insulina lenta"
-                    android:textSize="12sp"
-                    android:textColor="#666666"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="IOB (Activa)"
+                            android:textSize="12sp"
+                            android:textColor="#757575"/>
+
+                        <TextView
+                            android:id="@+id/tvIOB"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1.2 U"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="#6200EE"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    android:layout_marginStart="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Basal (Lenta)"
+                            android:textSize="12sp"
+                            android:textColor="#757575"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="24 U"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="#0091EA"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Fila 2: Insulina activa (IOB) -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_card"
-            android:elevation="3dp"
-            android:padding="12dp"
-            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textIOB"
-                android:text="0.0 Unidades"
-                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Acciones Rápidas"
                 android:textSize="18sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="16dp"/>
 
-            <TextView
-                android:text="Insulina activa en el cuerpo"
-                android:textSize="12sp"
-                android:textColor="#666666"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardNewBolo"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#6200EE"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginBottom="16dp">
 
-    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+"
+                        android:textSize="32sp"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginEnd="16dp"/>
 
-        <!-- BOTÓN CALCULAR BOLO -->
-        <Button
-            android:id="@+id/btnBolo"
-            android:text="Calculador de bolo"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_margin="16dp"
-            android:padding="16dp"
-            android:backgroundTint="#4DA3FF"
-            android:textColor="#FFFFFF"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:elevation="6dp"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Calcular Nuevo Bolo"
+                            android:textColor="#FFFFFF"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Registrar comida e insulina"
+                            android:textColor="#E0E0E0"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-
-        <!-- RECURSOS -->
-        <TextView
-            android:text="Recursos para ti"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <TextView
-                android:text="Ejercicio seguro"
-                android:gravity="center"
-                android:background="#E3F2FD"
-                android:padding="16dp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="Hipoglucemias"
-                android:gravity="center"
-                android:background="#FFF3E0"
-                android:padding="16dp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSettings"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"/>
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true">
 
-            <TextView
-                android:text="Alimentación"
-                android:gravity="center"
-                android:background="#E8F5E9"
-                android:padding="16dp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Configuración Médica"
+                        android:textColor="#333333"
+                        android:textStyle="bold"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Editar >"
+                        android:textColor="#757575"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
-
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
