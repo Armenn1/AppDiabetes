@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         val btnLogout = findViewById<ImageButton>(R.id.btnLogout)
         val cardNewBolo = findViewById<MaterialCardView>(R.id.cardNewBolo)
         val cardSettings = findViewById<MaterialCardView>(R.id.cardSettings)
+        val cardHistory = findViewById<MaterialCardView>(R.id.cardHistory)
 
         tvGlucosa = findViewById(R.id.tvGlucosaMain)
         tvIOB = findViewById(R.id.tvIOB)
@@ -48,6 +49,12 @@ class MainActivity : AppCompatActivity() {
 
         cardSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        cardHistory.setOnClickListener {
+            // Abrimos la pantalla de Historial
+            val intent = Intent(this, HistoryActivity::class.java)
+            startActivity(intent)
         }
 
         btnLogout.setOnClickListener {
