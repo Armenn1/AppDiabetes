@@ -21,6 +21,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val etFactorHC = findViewById<EditText>(R.id.etFactorHC)
         val etSensibilidad = findViewById<EditText>(R.id.etSensibilidad)
+        val etObjetivo = findViewById<EditText>(R.id.etObjetivo)
         val btnSave = findViewById<Button>(R.id.btnSaveSettings)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
 

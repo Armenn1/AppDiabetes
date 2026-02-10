@@ -88,6 +88,26 @@
 
         <Space
             android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Objetivo de glucosa (mg/dl)"
+            android:layout_marginBottom="8dp"
+            android:textColor="#333333"/>
+
+        <EditText
+            android:id="@+id/etObjetivo"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@android:drawable/editbox_background"
+            android:hint="Ej: 100"
+            android:inputType="numberDecimal"
+            android:paddingHorizontal="16dp" />
+
+        <Space
+            android:layout_width="match_parent"
             android:layout_height="32dp" />
 
         <Button
