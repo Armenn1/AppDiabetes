@@ -21,7 +21,7 @@ class BoloActivity : AppCompatActivity() {
     // Variables médicas (Se rellenan desde Firebase)
     private var myRatio: Double = 0.0
     private var mySensibilidad: Double = 0.0
-    // Nuevo: Objetivo personal (Por defecto 100 si falla la carga)
+    // Objetivo personal (Por defecto 100 si falla la carga)
     private var myTarget: Double = 100.0
 
     private var dataLoaded = false // Semáforo
@@ -162,14 +162,14 @@ class BoloActivity : AppCompatActivity() {
     private fun saveLogToFirebase(glucosa: Double, raciones: Double, comida: Double, correccion: Double, total: Double) {
         val userId = auth.currentUser?.uid ?: return
 
-        // Asegúrate de que tu clase BoloLog existe y tiene estos campos
+
         val nuevoLog = BoloLog(
             glucosa = glucosa,
             raciones = raciones,
             dosisComida = comida,
             dosisCorreccion = correccion,
             dosisTotal = total,
-            fecha = System.currentTimeMillis() // Asegúrate de que tu Data Class tenga esto o se genere solo
+            fecha = System.currentTimeMillis()
         )
 
         db.collection("users").document(userId)
