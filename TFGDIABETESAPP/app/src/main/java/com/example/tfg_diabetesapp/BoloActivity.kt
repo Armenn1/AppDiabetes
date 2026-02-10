@@ -62,7 +62,6 @@ class BoloActivity : AppCompatActivity() {
                     cardResult.visibility = View.VISIBLE
 
                     // Poner tarjeta en ROJO (Alerta)
-                    // Usamos ContextCompat para que no de errores de versión
                     cardResult.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.holo_red_light))
 
                     tvTotal.text = "HIPO"
@@ -71,7 +70,12 @@ class BoloActivity : AppCompatActivity() {
                     tvDesglose.text = "¡PELIGRO! Glucosa muy baja.\nIngiere azúcares rápidos y NO te inyectes."
                     tvDesglose.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
 
-                    return@setOnClickListener // ¡PARAMOS AQUÍ! No guardamos ni calculamos.
+                    // --- CAMBIO AQUÍ ---
+                    // Antes de parar (return), GUARDAMOS el registro.
+                    // Ponemos 0.0 en insulinas porque no te vas a pinchar.
+                    saveLogToFirebase(glucosa, raciones, 0.0, 0.0, 0.0)
+
+                    return@setOnClickListener // ¡PARAMOS AQUÍ! Ya hemos guardado, no calculamos más.
                 }
 
                 // --- B) CÁLCULO NORMAL (Si no hay peligro) ---
@@ -100,8 +104,7 @@ class BoloActivity : AppCompatActivity() {
                 tvDesglose.text = "Comida ($comidaRed) + Corrección ($correccionRed)"
                 cardResult.visibility = View.VISIBLE
 
-                // --- C) GUARDAR EN EL HISTORIAL ---
-                // Aquí llamamos a la función que vamos a crear en el paso 2
+                // --- C) GUARDAR EN EL HISTORIAL (NORMAL) ---
                 saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRedondeado)
 
             } else {
