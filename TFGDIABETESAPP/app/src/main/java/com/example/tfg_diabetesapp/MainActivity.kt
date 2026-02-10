@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             else -> R.color.green_ok // Tendrías que definir este color o usar uno por defecto
         }
 
-        // Si quieres cambiar el color del texto según el valor:
+        //  cambiar el color del texto según el valor:
         // tvGlucosa.setTextColor(ContextCompat.getColor(this, color))
     }
 
