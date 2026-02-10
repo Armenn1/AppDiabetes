@@ -1,4 +1,4 @@
-package com.example.tfg_diabetesapp //
+package com.example.tfg_diabetesapp
 
 import android.os.Bundle
 import android.view.View
@@ -18,10 +18,13 @@ class BoloActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    // Variables médicas (Se rellenarán desde Firebase)
+    // Variables médicas (Se rellenan desde Firebase)
     private var myRatio: Double = 0.0
     private var mySensibilidad: Double = 0.0
-    private var dataLoaded = false // Semáforo para saber si ya tenemos los datos
+    // Nuevo: Objetivo personal (Por defecto 100 si falla la carga)
+    private var myTarget: Double = 100.0
+
+    private var dataLoaded = false // Semáforo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,8 @@ class BoloActivity : AppCompatActivity() {
         // Referencias UI
         val etGlucosa = findViewById<EditText>(R.id.etGlucosaActual)
         val etRaciones = findViewById<EditText>(R.id.etRaciones)
+        // Eliminamos etObjetivo: El usuario ya no tiene que escribirlo a mano
+
         val btnCalcular = findViewById<MaterialCardView>(R.id.btnCalcular)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
 
@@ -42,11 +47,10 @@ class BoloActivity : AppCompatActivity() {
         loadMedicalSettings()
 
         // 2. LÓGICA DEL BOTÓN CALCULAR
-
         btnCalcular.setOnClickListener {
-            // Seguridad: ¿Tenemos los ajustes cargados?
+            // Seguridad
             if (!dataLoaded) {
-                Toast.makeText(this, "Cargando ajustes...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Cargando tus ajustes médicos...", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -60,55 +64,63 @@ class BoloActivity : AppCompatActivity() {
                 // --- A) SEGURIDAD: DETECTAR HIPOGLUCEMIA ---
                 if (glucosa < 70) {
                     cardResult.visibility = View.VISIBLE
-
-                    // Poner tarjeta en ROJO (Alerta)
+                    // Color Rojo Alerta
                     cardResult.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.holo_red_light))
 
                     tvTotal.text = "HIPO"
                     tvTotal.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
 
-                    tvDesglose.text = "¡PELIGRO! Glucosa muy baja.\nIngiere azúcares rápidos y NO te inyectes."
+                    tvDesglose.text = "¡PELIGRO! Glucosa baja.\nIngiere azúcares rápidos y NO te inyectes."
                     tvDesglose.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
 
-                    // --- CAMBIO AQUÍ ---
-                    // Antes de parar (return), GUARDAMOS el registro.
-                    // Ponemos 0.0 en insulinas porque no te vas a pinchar.
+                    // Guardamos el evento con 0 insulina por seguridad
                     saveLogToFirebase(glucosa, raciones, 0.0, 0.0, 0.0)
 
-                    return@setOnClickListener // ¡PARAMOS AQUÍ! Ya hemos guardado, no calculamos más.
+                    return@setOnClickListener // STOP
                 }
 
-                // --- B) CÁLCULO NORMAL (Si no hay peligro) ---
+                // --- B) CÁLCULO AVANZADO (Con Objetivo Personalizado) ---
 
-                // 1. Restauramos colores normales (Blanco y texto oscuro)
+                // 1. Restauramos colores (Blanco)
                 cardResult.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
                 tvTotal.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.black))
                 tvDesglose.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.darker_gray))
 
-                // 2. La Fórmula
+                // 2. LA FÓRMULA INTELIGENTE
                 val insuComida = raciones * myRatio
-                var insuCorreccion = (glucosa - 100) / mySensibilidad
 
-                // Si la corrección es negativa (ej: glucosa 90), la ponemos a 0 para no restar insulina de la comida
-                if (insuCorreccion < 0) insuCorreccion = 0.0
+                // Corrección: (Glucosa - Objetivo) / Sensibilidad
+                // NOTA: Permitimos negativos. Si estás en 90 y tu objetivo es 110, restará insulina.
+                val insuCorreccion = (glucosa - myTarget) / mySensibilidad
 
-                val total = insuComida + insuCorreccion
+                // Suma total
+                var total = insuComida + insuCorreccion
 
-                // Redondeos bonitos
+                // SEGURIDAD FINAL: La insulina nunca puede ser negativa
+                if (total < 0) total = 0.0
+
+                // Redondeos (1 decimal)
                 val totalRedondeado = (total * 10.0).roundToInt() / 10.0
                 val comidaRed = (insuComida * 10.0).roundToInt() / 10.0
                 val correccionRed = (insuCorreccion * 10.0).roundToInt() / 10.0
 
-                // 3. Mostrar en pantalla
+                // 3. Mostrar
                 tvTotal.text = "$totalRedondeado U"
-                tvDesglose.text = "Comida ($comidaRed) + Corrección ($correccionRed)"
+
+                // Explicación dinámica (para que el usuario entienda si le restamos insulina)
+                if (correccionRed < 0) {
+                    tvDesglose.text = "Comida ($comidaRed) - Resta (${kotlin.math.abs(correccionRed)})"
+                } else {
+                    tvDesglose.text = "Comida ($comidaRed) + Corrección ($correccionRed)"
+                }
+
                 cardResult.visibility = View.VISIBLE
 
-                // --- C) GUARDAR EN EL HISTORIAL (NORMAL) ---
+                // --- C) GUARDAR ---
                 saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRedondeado)
 
             } else {
-                Toast.makeText(this, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Rellena glucosa y raciones", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -118,7 +130,6 @@ class BoloActivity : AppCompatActivity() {
         }
     }
 
-    // Función auxiliar para bajar los datos de Firestore
     private fun loadMedicalSettings() {
         val userId = auth.currentUser?.uid
         if (userId == null) return
@@ -128,10 +139,13 @@ class BoloActivity : AppCompatActivity() {
                 if (document.exists()) {
                     val ratio = document.getDouble("factorHC")
                     val sensi = document.getDouble("sensibilidad")
+                    // CARGAMOS EL OBJETIVO (Si no existe, usamos 100 por defecto)
+                    val target = document.getDouble("target") ?: 100.0
 
                     if (ratio != null && sensi != null) {
                         myRatio = ratio
                         mySensibilidad = sensi
+                        myTarget = target // Guardamos el objetivo
                         dataLoaded = true
                     } else {
                         Toast.makeText(this, "¡Faltan configurar tus Ajustes!", Toast.LENGTH_LONG).show()
@@ -144,30 +158,22 @@ class BoloActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error de conexión", Toast.LENGTH_SHORT).show()
             }
     }
-    // Esta función recibe los datos y usa tu Data Class "BoloLog" para subirlos a Firebase
+
     private fun saveLogToFirebase(glucosa: Double, raciones: Double, comida: Double, correccion: Double, total: Double) {
         val userId = auth.currentUser?.uid ?: return
 
-        // Creamos el objeto usando la clase que creaste antes
+        // Asegúrate de que tu clase BoloLog existe y tiene estos campos
         val nuevoLog = BoloLog(
-            // La fecha se pone sola porque lo definiste así en el data class (System.currentTimeMillis())
             glucosa = glucosa,
             raciones = raciones,
             dosisComida = comida,
             dosisCorreccion = correccion,
-            dosisTotal = total
+            dosisTotal = total,
+            fecha = System.currentTimeMillis() // Asegúrate de que tu Data Class tenga esto o se genere solo
         )
 
-        // Subimos a Firebase: users -> [ID] -> history -> [Nuevo Documento]
         db.collection("users").document(userId)
-            .collection("history") // Nueva sub-colección automática
+            .collection("history")
             .add(nuevoLog)
-            .addOnSuccessListener {
-                // Confirmación visual discreta
-                // Opcional: Toast.makeText(this, "Guardado en historial", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error al guardar historial", Toast.LENGTH_SHORT).show()
-            }
     }
 }
