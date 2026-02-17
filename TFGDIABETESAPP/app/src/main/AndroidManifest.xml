@@ -18,9 +18,6 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
-        <activity
             android:name=".BoloActivity"
             android:exported="false" />
         <activity
@@ -32,9 +29,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".HistoryActivity"
-            android:exported="false" />
     </application>
 
 </manifest>

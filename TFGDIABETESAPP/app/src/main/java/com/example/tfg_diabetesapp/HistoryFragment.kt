@@ -1,17 +1,18 @@
 package com.example.tfg_diabetesapp
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageButton
+import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
-class HistoryActivity : AppCompatActivity() {
+class HistoryFragment : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -20,24 +21,26 @@ class HistoryActivity : AppCompatActivity() {
     private val listaDatos = mutableListOf<BoloLog>()
     private lateinit var adapter: HistoryAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_history)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // 1. Inflar la vista
+        val view = inflater.inflate(R.layout.fragment_history, container, false)
 
-        val btnBack = findViewById<ImageButton>(R.id.btnBackHist)
-        val rvHistory = findViewById<RecyclerView>(R.id.rvHistory)
-        val tvEmpty = findViewById<TextView>(R.id.tvEmpty)
+        // 2. Referencias UI (usando 'view.')
+        val rvHistory = view.findViewById<RecyclerView>(R.id.rvHistory)
+        val tvEmpty = view.findViewById<TextView>(R.id.tvEmpty)
 
-        // Configurar RecyclerView
-        rvHistory.layoutManager = LinearLayoutManager(this)
+        // 3. Configurar RecyclerView (ATENCIÓN: requireContext() en lugar de 'this')
+        rvHistory.layoutManager = LinearLayoutManager(requireContext())
         adapter = HistoryAdapter(listaDatos)
         rvHistory.adapter = adapter
 
-        // Botón volver
-        btnBack.setOnClickListener { finish() }
-
-        // Cargar datos
+        // 4. Cargar datos desde Firebase
         cargarHistorial(tvEmpty, rvHistory)
+
+        return view
     }
 
     private fun cargarHistorial(tvEmpty: TextView, rv: RecyclerView) {
