@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TFGDIABETESAPP">
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity2"
             android:exported="false" />
         <activity
             android:name=".RegisterActivity"
@@ -24,7 +24,7 @@
             android:name=".BoloActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity2"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

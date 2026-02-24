@@ -29,6 +29,14 @@ class MainActivity : AppCompatActivity() {
                     replaceFragment(HistoryFragment())
                     true
                 }
+                R.id.nav_scanner -> {
+                    replaceFragment(ScannerFragment())
+                    true
+                }
+                R.id.nav_news -> {
+                    replaceFragment(NewsFragment())
+                    true
+                }
                 R.id.nav_settings -> {
                     replaceFragment(SettingsFragment())
                     true
