@@ -1,4 +1,4 @@
-package com.example.tfg_diabetesapp
+package com.example.tfg_diabetesapp.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.tfg_diabetesapp.BoloLog
+import com.example.tfg_diabetesapp.HistoryAdapter
+import com.example.tfg_diabetesapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query

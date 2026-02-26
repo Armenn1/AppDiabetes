@@ -1,4 +1,4 @@
-package com.example.tfg_diabetesapp
+package com.example.tfg_diabetesapp.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +9,9 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.tfg_diabetesapp.BoloActivity
+import com.example.tfg_diabetesapp.LoginActivity
+import com.example.tfg_diabetesapp.R
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -61,7 +64,7 @@ class HomeFragment : Fragment() {
         return view
     }
 
-    // --- MAGIA: SE EJECUTA AL VOLVER A LA PESTAÑA (Ej: después de calcular un bolo) ---
+    // --- SE EJECUTA AL VOLVER A LA PESTAÑA (Ej: después de calcular un bolo) ---
     override fun onResume() {
         super.onResume()
         refreshDashboardData()

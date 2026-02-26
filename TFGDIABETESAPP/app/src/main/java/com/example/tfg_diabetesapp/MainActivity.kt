@@ -3,6 +3,11 @@ package com.example.tfg_diabetesapp
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.tfg_diabetesapp.fragments.HistoryFragment
+import com.example.tfg_diabetesapp.fragments.HomeFragment
+import com.example.tfg_diabetesapp.fragments.NewsFragment
+import com.example.tfg_diabetesapp.fragments.ScannerFragment
+import com.example.tfg_diabetesapp.fragments.SettingsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {

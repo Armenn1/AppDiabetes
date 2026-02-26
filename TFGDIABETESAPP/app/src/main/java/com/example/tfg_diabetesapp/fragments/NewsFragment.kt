@@ -1,10 +1,11 @@
-package com.example.tfg_diabetesapp
+package com.example.tfg_diabetesapp.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.tfg_diabetesapp.R
 
 class NewsFragment : Fragment() {
     override fun onCreateView(
