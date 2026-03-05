@@ -18,8 +18,10 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="#6200EE"
-        app:itemTextColor="#6200EE"
+
+        app:itemIconTint="@color/nav_item_colors"
+        app:itemTextColor="@color/nav_item_colors"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

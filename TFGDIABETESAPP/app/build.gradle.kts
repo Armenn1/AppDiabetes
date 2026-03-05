@@ -39,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation("androidx.fragment:fragment-ktx:1.8.9")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
