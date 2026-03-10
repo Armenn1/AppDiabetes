@@ -28,6 +28,15 @@ class BoloActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Si no hay cuenta logeada manda a inicio de session (por el widget)
+        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+        if (auth.currentUser == null) {
+            val intent = android.content.Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
         setContentView(R.layout.activity_bolo)
 
         // Referencias UI
