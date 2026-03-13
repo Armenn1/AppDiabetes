@@ -1,5 +1,8 @@
 package com.example.tfg_diabetesapp.fragments
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -43,6 +46,15 @@ class ScannerFragment : Fragment() {
         }
     }
 
+    // NUEVO: PREPARAMOS EL POP-UP DE SEGURIDAD DE ANDROID
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            takePicturePreview.launch(null) // Si da permiso, abre cámara
+        } else {
+            Toast.makeText(requireContext(), "Necesitas dar permiso de cámara para escanear", Toast.LENGTH_LONG).show()
+        }
+    }
+
     // 3. CREAMOS LA PANTALLA
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,8 +70,15 @@ class ScannerFragment : Fragment() {
         progressBarAI = view.findViewById(R.id.progressBarAI)
 
         // 5. ACCIONES DE LOS BOTONES
+        // BOTÓN DE FOTO CON CONTROL DE SEGURIDAD
         btnTakePhoto.setOnClickListener {
-            takePicturePreview.launch(null)
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                // Ya tenemos permiso, abrimos cámara directo
+                takePicturePreview.launch(null)
+            } else {
+                // No tenemos permiso, sacamos el pop-up de Android
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
         }
 
         btnAnalyze.setOnClickListener {
@@ -81,13 +100,13 @@ class ScannerFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val generativeModel = GenerativeModel(
-                    modelName = "gemini-1.5-flash",
+                    modelName = "gemini-2.5-flash",
                     apiKey = "AIzaSyCM33JU6aVKFUJJW0F3KfyAag5IDpUdOE4" // APi key
                 )
 
                 val inputContent = content {
                     image(bitmap)
-                    text("Actúa como un nutricionista experto en diabetes tipo 1. Mira esta foto y dime qué comida principal ves. Luego, estima los gramos totales de Hidratos de Carbono (HC) de esa ración. Sé directo. Termina diciendo cuántas raciones son (1 ración = 10g de HC).")
+                    text("Actúa como un nutricionista experto en diabetes tipo 1. Mira esta foto y dime qué comida principal ves. Luego, estima los gramos totales de Hidratos de Carbono (HC) de esa ración. Sé directo. Termina diciendo cuántas raciones son (1 ración = 10g de HC). Responde unicamente con que comida es, la cantidad de carbohidratos y las raciones, Respuesta breve")
                 }
 
                 val response = generativeModel.generateContent(inputContent)
