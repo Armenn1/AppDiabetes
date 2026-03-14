@@ -1,72 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="20dp"
     android:gravity="center_horizontal"
-    android:background="#F5F5F5">
+    android:background="#FAFAFA">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Escáner de Hidratos IA"
-        android:textSize="24sp"
+        android:text="Escáner IA"
+        android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="#6200EE"
-        android:layout_marginBottom="16dp"/>
+        android:textColor="#2C3E50"
+        android:letterSpacing="0.02"
+        android:layout_marginBottom="24dp"
+        android:layout_marginTop="16dp"/>
 
-    <ImageView
-        android:id="@+id/ivFoodPhoto"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:background="#E0E0E0"
-        android:scaleType="centerCrop"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="260dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:id="@+id/ivFoodPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#E8EAED"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="🍽️"
+            android:textSize="48sp"
+            android:alpha="0.3"/>
+    </androidx.cardview.widget.CardView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="2"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="24dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnTakePhoto"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="📸 1. Foto" />
+            android:text="📸 1. Capturar"
+            app:cornerRadius="12dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#3498DB"
+            android:textStyle="bold"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAnalyze"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:text="🧠 2. Analizar"
-            android:enabled="false" /> </LinearLayout>
+            app:cornerRadius="12dp"
+            android:enabled="false"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#2ECC71"
+            android:textStyle="bold"/>
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progressBarAI"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone" />
+        android:indeterminateTint="#3498DB"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"/>
 
-    <ScrollView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="16dp">
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:layout_marginBottom="8dp">
 
-        <TextView
-            android:id="@+id/tvAiResult"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Saca una foto a tu plato y la IA estimará los gramos de Hidratos de Carbono (HC)."
-            android:textSize="16sp"
-            android:textColor="#333333" />
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvAiResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Apunta la cámara a tu comida y deja que la IA calcule las raciones de hidratos por ti."
+                android:textSize="16sp"
+                android:textColor="#555555"
+                android:lineSpacingExtra="4dp"/>
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>
