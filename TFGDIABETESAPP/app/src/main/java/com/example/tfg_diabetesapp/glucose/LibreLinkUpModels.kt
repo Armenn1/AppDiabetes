@@ -20,7 +20,7 @@ data class LoginData(
 )
 
 data class AuthTicket(
-    val token: String, // 🔑 ¡ESTO ES EL PASE VIP (JWT)! Lo necesitamos para todo.
+    val token: String, // 🔑.
     val expires: Long,
     val duration: Long
 )
