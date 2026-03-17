@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,15 +7,14 @@
     tools:context=".fragments.SettingsFragment">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingHorizontal="32dp"
+        android:paddingTop="32dp"
+        android:paddingBottom="32dp">
 
+        <!-- Sección Médica -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,7 +23,7 @@
             android:textStyle="bold"
             android:textColor="#333333"
             android:layout_gravity="center"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="8dp"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -34,7 +32,7 @@
             android:textSize="14sp"
             android:textColor="#757575"
             android:gravity="center"
-            android:layout_marginBottom="32dp"/>
+            android:layout_marginBottom="24dp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -52,9 +50,7 @@
             android:inputType="numberDecimal"
             android:paddingHorizontal="16dp" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="24dp" />
+        <Space android:layout_width="match_parent" android:layout_height="24dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -72,9 +68,7 @@
             android:inputType="numberDecimal"
             android:paddingHorizontal="16dp" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="24dp" />
+        <Space android:layout_width="match_parent" android:layout_height="24dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -92,9 +86,70 @@
             android:inputType="numberDecimal"
             android:paddingHorizontal="16dp" />
 
-        <Space
+        <Space android:layout_width="match_parent" android:layout_height="32dp" />
+
+        <!-- Divisor -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="32dp" />
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Sección LibreLinkUp -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cuenta LibreLinkUp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Introduce las credenciales de tu cuenta LibreLinkUp para ver tu glucosa en tiempo real."
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email de LibreLinkUp"
+            android:layout_marginBottom="8dp"
+            android:textColor="#333333"/>
+
+        <EditText
+            android:id="@+id/etLibreEmail"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@android:drawable/editbox_background"
+            android:hint="usuario@ejemplo.com"
+            android:inputType="textEmailAddress"
+            android:paddingHorizontal="16dp" />
+
+        <Space android:layout_width="match_parent" android:layout_height="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contraseña de LibreLinkUp"
+            android:layout_marginBottom="8dp"
+            android:textColor="#333333"/>
+
+        <EditText
+            android:id="@+id/etLibrePassword"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@android:drawable/editbox_background"
+            android:hint="Contraseña"
+            android:inputType="textPassword"
+            android:paddingHorizontal="16dp" />
+
+        <Space android:layout_width="match_parent" android:layout_height="32dp" />
 
         <Button
             android:id="@+id/btnSaveSettings"
@@ -106,4 +161,4 @@
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

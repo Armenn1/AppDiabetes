@@ -29,48 +29,53 @@ class SettingsFragment : Fragment() {
         val etFactorHC = view.findViewById<EditText>(R.id.etFactorHC)
         val etSensibilidad = view.findViewById<EditText>(R.id.etSensibilidad)
         val etObjetivo = view.findViewById<EditText>(R.id.etObjetivo)
+        val etLibreEmail = view.findViewById<EditText>(R.id.etLibreEmail)
+        val etLibrePassword = view.findViewById<EditText>(R.id.etLibrePassword)
         val btnSave = view.findViewById<Button>(R.id.btnSaveSettings)
 
         // 1. Cargar datos
-        loadExistingData(etFactorHC, etSensibilidad, etObjetivo)
+        loadExistingData(etFactorHC, etSensibilidad, etObjetivo, etLibreEmail, etLibrePassword)
 
         // 2. Acción de Guardar
         btnSave.setOnClickListener {
             val factorText = etFactorHC.text.toString()
             val sensibilidadText = etSensibilidad.text.toString()
             val objetivoText = etObjetivo.text.toString()
+            val libreEmailText = etLibreEmail.text.toString().trim()
+            val librePasswordText = etLibrePassword.text.toString()
 
             if (factorText.isNotEmpty() && sensibilidadText.isNotEmpty() && objetivoText.isNotEmpty()) {
-                // Pasamos los 3 valores convertidos a Double
                 saveToFirestore(
                     factorText.toDouble(),
                     sensibilidadText.toDouble(),
-                    objetivoText.toDouble()
+                    objetivoText.toDouble(),
+                    libreEmailText,
+                    librePasswordText
                 )
             } else {
-                Toast.makeText(requireContext(), "Por favor rellena todos los campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Por favor rellena los campos médicos", Toast.LENGTH_SHORT).show()
             }
         }
 
         return view
     }
 
-    private fun saveToFirestore(factor: Double, sensibilidad: Double, objetivo: Double) {
+    private fun saveToFirestore(factor: Double, sensibilidad: Double, objetivo: Double, libreEmail: String, librePassword: String) {
         val userId = auth.currentUser?.uid
 
         if (userId != null) {
-            // Creamos el mapa con los 3 datos
-            val medicalData = hashMapOf(
+            val data = hashMapOf(
                 "factorHC" to factor,
                 "sensibilidad" to sensibilidad,
-                "target" to objetivo
+                "target" to objetivo,
+                "libreEmail" to libreEmail,
+                "librePassword" to librePassword
             )
 
             db.collection("users").document(userId)
-                .set(medicalData)
-                .addOnSuccessListener{
+                .set(data, com.google.firebase.firestore.SetOptions.merge())
+                .addOnSuccessListener {
                     Toast.makeText(requireContext(), "Configuración guardada", Toast.LENGTH_SHORT).show()
-                    // Se elimina finish() porque el Fragment no se cierra, se queda esperando interacción
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
@@ -80,7 +85,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun loadExistingData(etFactor: EditText, etSensibilidad: EditText, etObjetivo: EditText) {
+    private fun loadExistingData(etFactor: EditText, etSensibilidad: EditText, etObjetivo: EditText, etLibreEmail: EditText, etLibrePassword: EditText) {
         val userId = auth.currentUser?.uid
         if (userId != null) {
             db.collection("users").document(userId).get()
@@ -88,13 +93,15 @@ class SettingsFragment : Fragment() {
                     if (document.exists()) {
                         val factor = document.getDouble("factorHC")
                         val sensi = document.getDouble("sensibilidad")
-
-                        // Intentamos leer 'target'. Si no existe ponemos 100.0 por defecto
                         val target = document.getDouble("target") ?: 100.0
+                        val libreEmail = document.getString("libreEmail") ?: ""
+                        val librePassword = document.getString("librePassword") ?: ""
 
                         if (factor != null) etFactor.setText(factor.toString())
                         if (sensi != null) etSensibilidad.setText(sensi.toString())
                         etObjetivo.setText(target.toString())
+                        etLibreEmail.setText(libreEmail)
+                        etLibrePassword.setText(librePassword)
                     }
                 }
         }

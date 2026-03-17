@@ -40,9 +40,9 @@ class HomeFragment : Fragment() {
     private lateinit var tvLastUpdated: TextView
     private lateinit var pbGlucoseLoading: ProgressBar
 
-    // Credenciales LibreLinkUp
-    private val libreEmail = "rocarmengol0@gmail.com"
-    private val librePassword = "Matadepera52"
+    // Credenciales LibreLinkUp (se cargan desde Firestore)
+    private var libreEmail = ""
+    private var librePassword = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,11 +85,30 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        // Recargar credenciales LibreLinkUp por si el usuario las cambió en Ajustes
+        loadLibreCredentials()
         // Actualizar IOB al volver (ej: después de calcular un bolo)
         refreshIobData()
     }
 
+    private fun loadLibreCredentials() {
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                libreEmail = document.getString("libreEmail") ?: ""
+                librePassword = document.getString("librePassword") ?: ""
+            }
+    }
+
     private suspend fun fetchGlucoseFromLibre() {
+        if (libreEmail.isEmpty() || librePassword.isEmpty()) {
+            withContext(Dispatchers.Main) {
+                tvGlucosa.text = "--"
+                tvLastUpdated.text = "Configura tu cuenta LibreLinkUp en Ajustes"
+            }
+            return
+        }
+
         withContext(Dispatchers.Main) {
             pbGlucoseLoading.visibility = View.VISIBLE
         }
