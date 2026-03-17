@@ -72,6 +72,9 @@ class HomeFragment : Fragment() {
             requireActivity().finish()
         }
 
+        // Cargar credenciales y lanzar fetch inmediato al arrancar
+        loadLibreCredentials(fetchAfterLoad = true)
+
         // Bucle de auto-actualización: fetch glucosa cada 60 segundos
         viewLifecycleOwner.lifecycleScope.launch {
             while (isActive) {
@@ -91,12 +94,21 @@ class HomeFragment : Fragment() {
         refreshIobData()
     }
 
-    private fun loadLibreCredentials() {
+    private fun loadLibreCredentials(fetchAfterLoad: Boolean = false) {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
-                libreEmail = document.getString("libreEmail") ?: ""
-                librePassword = document.getString("librePassword") ?: ""
+                val newEmail = document.getString("libreEmail") ?: ""
+                val newPassword = document.getString("librePassword") ?: ""
+                val credentialsChanged = newEmail != libreEmail || newPassword != librePassword
+                libreEmail = newEmail
+                librePassword = newPassword
+                // Si se pidió fetch inmediato o las credenciales cambiaron, actualizar glucosa ahora
+                if ((fetchAfterLoad || credentialsChanged) && libreEmail.isNotEmpty()) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        fetchGlucoseFromLibre()
+                    }
+                }
             }
     }
 
