@@ -15,6 +15,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TFGDIABETESAPP">
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3232084480515162~5022343768"
+        />
+
+
         <receiver
             android:name=".QuickBoloWidget"
             android:exported="true">
