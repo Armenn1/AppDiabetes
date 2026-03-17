@@ -6,16 +6,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.LoginActivity
 import com.example.tfg_diabetesapp.R
+import com.example.tfg_diabetesapp.glucose.LibreLinkUpRepository
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -24,56 +35,85 @@ class HomeFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
-    // Variables UI globales
     private lateinit var tvGlucosa: TextView
     private lateinit var tvIOB: TextView
+    private lateinit var tvLastUpdated: TextView
+    private lateinit var pbGlucoseLoading: ProgressBar
+
+    // Credenciales LibreLinkUp
+    private val libreEmail = "rocarmengol0@gmail.com"
+    private val librePassword = "Matadepera52"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // 1. Inflar la vista (crear el trozo de pantalla desde el XML)
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        // 2. Inicializar Firebase
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // 3. REFERENCIAS UI (Fíjate que usamos 'view.findViewById')
         val btnLogout = view.findViewById<ImageButton>(R.id.btnLogout)
         val cardNewBolo = view.findViewById<MaterialCardView>(R.id.cardNewBolo)
-
         tvGlucosa = view.findViewById(R.id.tvGlucosaMain)
         tvIOB = view.findViewById(R.id.tvIOB)
+        tvLastUpdated = view.findViewById(R.id.tvLastUpdated)
+        pbGlucoseLoading = view.findViewById(R.id.pbGlucoseLoading)
 
-        // 4. NAVEGACIÓN A LA CALCULADORA
         cardNewBolo.setOnClickListener {
             startActivity(Intent(requireContext(), BoloActivity::class.java))
         }
 
-        // 5. CERRAR SESIÓN
         btnLogout?.setOnClickListener {
             auth.signOut()
             val intent = Intent(requireContext(), LoginActivity::class.java)
-            // Borramos el historial de pantallas para que no pueda volver con el botón 'Atrás'
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
-            requireActivity().finish() // Cerramos la MainActivity que contiene el Fragment
+            requireActivity().finish()
+        }
+
+        // Bucle de auto-actualización: fetch glucosa cada 60 segundos
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (isActive) {
+                fetchGlucoseFromLibre()
+                delay(60_000L)
+            }
         }
 
         return view
     }
 
-    // --- SE EJECUTA AL VOLVER A LA PESTAÑA (Ej: después de calcular un bolo) ---
     override fun onResume() {
         super.onResume()
-        refreshDashboardData()
+        // Actualizar IOB al volver (ej: después de calcular un bolo)
+        refreshIobData()
     }
 
-    private fun refreshDashboardData() {
+    private suspend fun fetchGlucoseFromLibre() {
+        withContext(Dispatchers.Main) {
+            pbGlucoseLoading.visibility = View.VISIBLE
+        }
+
+        val glucoseResult = withContext(Dispatchers.IO) {
+            LibreLinkUpRepository.getLatestGlucose(libreEmail, librePassword)
+        }
+
+        withContext(Dispatchers.Main) {
+            pbGlucoseLoading.visibility = View.GONE
+            if (glucoseResult != null) {
+                updateGlucoseCard(glucoseResult.toDouble())
+                val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                tvLastUpdated.text = "Última act. $hora"
+            } else {
+                tvGlucosa.text = "--"
+                tvLastUpdated.text = "Error de conexión"
+            }
+        }
+    }
+
+    private fun refreshIobData() {
         val userId = auth.currentUser?.uid ?: return
 
-        // Consulta: Descargar solo el último registro
         db.collection("users").document(userId)
             .collection("history")
             .orderBy("fecha", Query.Direction.DESCENDING)
@@ -82,20 +122,12 @@ class HomeFragment : Fragment() {
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
                     val lastLog = documents.documents[0]
-
-                    val glucosa = lastLog.getDouble("glucosa") ?: 0.0
                     val dosisTotal = lastLog.getDouble("dosisTotal") ?: 0.0
                     val fechaLog = lastLog.getLong("fecha") ?: System.currentTimeMillis()
-
-                    updateGlucoseCard(glucosa)
                     calculateAndShowIOB(dosisTotal, fechaLog)
                 } else {
-                    tvGlucosa.text = "--"
                     tvIOB.text = "0.0 U"
                 }
-            }
-            .addOnFailureListener {
-                // Silencioso si falla la red
             }
     }
 
@@ -105,26 +137,22 @@ class HomeFragment : Fragment() {
         val color = when {
             glucosa < 70 -> android.R.color.holo_red_light
             glucosa > 180 -> android.R.color.holo_orange_light
-            else -> android.R.color.darker_gray // Un color neutro/verde para estar en rango
+            else -> android.R.color.darker_gray
         }
 
-        // Aplicamos el color (usamos requireContext() en lugar de 'this')
         tvGlucosa.setTextColor(ContextCompat.getColor(requireContext(), color))
     }
 
     private fun calculateAndShowIOB(dosis: Double, fechaLog: Long) {
         val ahora = System.currentTimeMillis()
-        val diferenciaMillis = ahora - fechaLog
-        val minutosPasados = TimeUnit.MILLISECONDS.toMinutes(diferenciaMillis)
+        val minutosPasados = TimeUnit.MILLISECONDS.toMinutes(ahora - fechaLog)
 
-        // Modelo de IOB lineal (4 horas = 240 mins)
         if (minutosPasados >= 240) {
             tvIOB.text = "0.0 U"
         } else {
             val factorRestante = 1.0 - (minutosPasados.toDouble() / 240.0)
             var iob = dosis * factorRestante
             if (iob < 0) iob = 0.0
-
             val iobRedondeado = (iob * 10.0).roundToInt() / 10.0
             tvIOB.text = "$iobRedondeado U"
         }
