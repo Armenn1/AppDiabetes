@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F0F2FF">
+    android:background="@color/color_background">
 
     <!-- HEADER -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#3F51B5"
+        android:background="@color/color_primary"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         android:paddingTop="28dp"
@@ -23,18 +23,18 @@
             android:text="Aprende"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Guía rápida sobre diabetes tipo 1"
             android:textSize="14sp"
-            android:textColor="#C5CAE9"
-            android:layout_marginTop="4dp"/>
+            android:textColor="#BBDEFB"
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
-    <!-- CONTENIDO -->
+    <!-- CONTENT -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -49,13 +49,13 @@
             android:paddingEnd="20dp"
             android:paddingBottom="32dp">
 
-            <!-- TARJETA: Raciones -->
+            <!-- Card: Raciones -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="6dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/color_surface"
                 android:layout_marginBottom="16dp">
 
                 <LinearLayout
@@ -66,7 +66,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#E8EAF6"
+                        android:background="@color/color_primary_light"
                         android:padding="16dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
@@ -75,7 +75,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🍞"
-                            android:textSize="22sp"/>
+                            android:textSize="22sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -83,8 +83,8 @@
                             android:text="¿Qué es una Ración?"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#3F51B5"
-                            android:layout_marginStart="10dp"/>
+                            android:textColor="@color/color_primary"
+                            android:layout_marginStart="10dp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -98,8 +98,8 @@
                             android:layout_height="wrap_content"
                             android:text="Una ración equivale a 10 g de hidratos de carbono (HC). Es la unidad básica para calcular el bolo de insulina antes de comer."
                             android:textSize="15sp"
-                            android:textColor="#424242"
-                            android:lineSpacingExtra="4dp"/>
+                            android:textColor="@color/color_text_primary"
+                            android:lineSpacingExtra="4dp" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -107,28 +107,28 @@
                             android:text="Ejemplos:"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="#3F51B5"
-                            android:layout_marginTop="12dp"/>
+                            android:textColor="@color/color_primary"
+                            android:layout_marginTop="12dp" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="• 1 rebanada de pan → ~1,5 raciones\n• 1 fruta mediana → ~1,5-2 raciones\n• 100 g de pasta cocida → ~2 raciones\n• 200 ml de zumo → ~2 raciones"
                             android:textSize="14sp"
-                            android:textColor="#616161"
+                            android:textColor="@color/color_text_secondary"
                             android:lineSpacingExtra="4dp"
-                            android:layout_marginTop="6dp"/>
+                            android:layout_marginTop="6dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- TARJETA: Regla de los 15 -->
+            <!-- Card: Regla de los 15 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="6dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/color_surface"
                 android:layout_marginBottom="16dp">
 
                 <LinearLayout
@@ -148,7 +148,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="⚠️"
-                            android:textSize="22sp"/>
+                            android:textSize="22sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -157,7 +157,7 @@
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="#C62828"
-                            android:layout_marginStart="10dp"/>
+                            android:layout_marginStart="10dp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -171,28 +171,28 @@
                             android:layout_height="wrap_content"
                             android:text="Ante una hipoglucemia (glucosa &lt; 70 mg/dL), actúa así:"
                             android:textSize="15sp"
-                            android:textColor="#424242"
-                            android:lineSpacingExtra="4dp"/>
+                            android:textColor="@color/color_text_primary"
+                            android:lineSpacingExtra="4dp" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="1. Toma 15 g de HC de acción rápida\n   (3 sobres de azúcar, 150 ml de zumo)\n\n2. Espera 15 minutos\n\n3. Vuelve a medir la glucosa\n\n4. Si sigue baja, repite el paso 1"
                             android:textSize="14sp"
-                            android:textColor="#616161"
+                            android:textColor="@color/color_text_secondary"
                             android:lineSpacingExtra="4dp"
-                            android:layout_marginTop="10dp"/>
+                            android:layout_marginTop="10dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- TARJETA: Rangos de glucosa -->
+            <!-- Card: Rangos de glucosa -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="6dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/color_surface"
                 android:layout_marginBottom="16dp">
 
                 <LinearLayout
@@ -212,7 +212,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="📊"
-                            android:textSize="22sp"/>
+                            android:textSize="22sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -221,7 +221,7 @@
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="#2E7D32"
-                            android:layout_marginStart="10dp"/>
+                            android:layout_marginStart="10dp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -240,7 +240,7 @@
                             <View
                                 android:layout_width="12dp"
                                 android:layout_height="12dp"
-                                android:background="#EF5350"/>
+                                android:background="@color/color_error" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -248,7 +248,7 @@
                                 android:text="  Hipoglucemia"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="#424242"/>
+                                android:textColor="@color/color_text_primary" />
 
                             <TextView
                                 android:layout_width="0dp"
@@ -256,9 +256,9 @@
                                 android:layout_weight="1"
                                 android:text="&lt; 70 mg/dL"
                                 android:textSize="14sp"
-                                android:textColor="#EF5350"
+                                android:textColor="@color/color_error"
                                 android:gravity="end"
-                                android:textStyle="bold"/>
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -271,7 +271,7 @@
                             <View
                                 android:layout_width="12dp"
                                 android:layout_height="12dp"
-                                android:background="#4CAF50"/>
+                                android:background="@color/color_success" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -279,7 +279,7 @@
                                 android:text="  En rango"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="#424242"/>
+                                android:textColor="@color/color_text_primary" />
 
                             <TextView
                                 android:layout_width="0dp"
@@ -287,9 +287,9 @@
                                 android:layout_weight="1"
                                 android:text="70 – 180 mg/dL"
                                 android:textSize="14sp"
-                                android:textColor="#4CAF50"
+                                android:textColor="@color/color_success"
                                 android:gravity="end"
-                                android:textStyle="bold"/>
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -301,7 +301,7 @@
                             <View
                                 android:layout_width="12dp"
                                 android:layout_height="12dp"
-                                android:background="#FF9800"/>
+                                android:background="@color/color_warning" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -309,7 +309,7 @@
                                 android:text="  Hiperglucemia"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="#424242"/>
+                                android:textColor="@color/color_text_primary" />
 
                             <TextView
                                 android:layout_width="0dp"
@@ -317,21 +317,21 @@
                                 android:layout_weight="1"
                                 android:text="&gt; 180 mg/dL"
                                 android:textSize="14sp"
-                                android:textColor="#FF9800"
+                                android:textColor="@color/color_warning"
                                 android:gravity="end"
-                                android:textStyle="bold"/>
+                                android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- TARJETA: IOB -->
+            <!-- Card: IOB -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="6dp"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/color_surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -341,7 +341,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#EDE7F6"
+                        android:background="@color/color_primary_light"
                         android:padding="16dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
@@ -350,7 +350,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="💉"
-                            android:textSize="22sp"/>
+                            android:textSize="22sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -358,8 +358,8 @@
                             android:text="IOB: Insulina Activa"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#6A1B9A"
-                            android:layout_marginStart="10dp"/>
+                            android:textColor="@color/color_primary"
+                            android:layout_marginStart="10dp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -373,17 +373,17 @@
                             android:layout_height="wrap_content"
                             android:text="El IOB (Insulin On Board) es la cantidad de insulina rápida que todavía está actuando en tu cuerpo."
                             android:textSize="15sp"
-                            android:textColor="#424242"
-                            android:lineSpacingExtra="4dp"/>
+                            android:textColor="@color/color_text_primary"
+                            android:lineSpacingExtra="4dp" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="La insulina rápida actúa durante ~4 horas. Tenerla en cuenta al calcular un nuevo bolo evita apilar insulina y sufrir hipoglucemias."
                             android:textSize="14sp"
-                            android:textColor="#616161"
+                            android:textColor="@color/color_text_secondary"
                             android:lineSpacingExtra="4dp"
-                            android:layout_marginTop="10dp"/>
+                            android:layout_marginTop="10dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

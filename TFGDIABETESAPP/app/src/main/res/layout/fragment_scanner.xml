@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F0F2FF">
+    android:background="@color/color_background">
 
     <!-- HEADER -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#3F51B5"
+        android:background="@color/color_primary"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         android:paddingTop="28dp"
@@ -23,18 +23,18 @@
             android:text="Escáner IA"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Analiza tu comida y calcula los hidratos"
             android:textSize="14sp"
-            android:textColor="#C5CAE9"
-            android:layout_marginTop="4dp"/>
+            android:textColor="#BBDEFB"
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
-    <!-- SCROLLABLE CONTENT (sube sobre el header con marginTop negativo) -->
+    <!-- SCROLLABLE CONTENT -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -49,7 +49,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="32dp">
 
-            <!-- TARJETA IMAGEN -->
+            <!-- Image card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="260dp"
@@ -61,21 +61,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <!-- Placeholder: visible hasta que se saque foto -->
                     <LinearLayout
                         android:id="@+id/layoutPlaceholder"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="#EEF0FF"
+                        android:background="@color/color_primary_light"
                         android:padding="24dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🍽️"
-                            android:textSize="58sp"/>
+                            android:textSize="58sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -83,30 +82,29 @@
                             android:text="Tu plato aparecerá aquí"
                             android:textSize="17sp"
                             android:textStyle="bold"
-                            android:textColor="#3F51B5"
-                            android:layout_marginTop="14dp"/>
+                            android:textColor="@color/color_primary"
+                            android:layout_marginTop="14dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Pulsa Capturar para escanear\ntu comida con la cámara"
                             android:textSize="13sp"
-                            android:textColor="#9E9E9E"
+                            android:textColor="@color/color_text_secondary"
                             android:gravity="center"
-                            android:layout_marginTop="8dp"/>
+                            android:layout_marginTop="8dp" />
                     </LinearLayout>
 
-                    <!-- Foto real (oculta hasta capturar) -->
                     <ImageView
                         android:id="@+id/ivFoodPhoto"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- BOTONES -->
+            <!-- Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -121,10 +119,8 @@
                     android:layout_marginEnd="8dp"
                     android:text="Capturar foto"
                     app:cornerRadius="14dp"
-                    android:textColor="#FFFFFF"
-                    app:backgroundTint="#3F51B5"
                     android:textStyle="bold"
-                    android:textSize="15sp"/>
+                    android:textSize="15sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAnalyze"
@@ -135,13 +131,12 @@
                     android:text="Analizar IA"
                     app:cornerRadius="14dp"
                     android:enabled="false"
-                    android:textColor="#FFFFFF"
                     app:backgroundTint="#00897B"
                     android:textStyle="bold"
-                    android:textSize="15sp"/>
+                    android:textSize="15sp" />
             </LinearLayout>
 
-            <!-- ESTADO CARGANDO -->
+            <!-- Loading state -->
             <LinearLayout
                 android:id="@+id/layoutLoading"
                 android:layout_width="match_parent"
@@ -149,7 +144,7 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:visibility="gone"
-                android:background="#E8EAF6"
+                android:background="@color/color_primary_light"
                 android:padding="14dp"
                 android:layout_marginBottom="16dp">
 
@@ -157,36 +152,35 @@
                     android:id="@+id/progressBarAI"
                     android:layout_width="26dp"
                     android:layout_height="26dp"
-                    android:indeterminateTint="#3F51B5"/>
+                    android:indeterminateTint="@color/color_primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Analizando tu plato con IA..."
-                    android:textColor="#3F51B5"
+                    android:textColor="@color/color_primary"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:layout_marginStart="12dp"/>
+                    android:layout_marginStart="12dp" />
             </LinearLayout>
 
-            <!-- TARJETA RESULTADO -->
+            <!-- Result card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/color_surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Cabecera de la tarjeta -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#E8EAF6"
+                        android:background="@color/color_primary_light"
                         android:paddingStart="20dp"
                         android:paddingEnd="20dp"
                         android:paddingTop="14dp"
@@ -198,7 +192,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🧠"
-                            android:textSize="20sp"/>
+                            android:textSize="20sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -206,20 +200,19 @@
                             android:text="Resultado del análisis"
                             android:textSize="15sp"
                             android:textStyle="bold"
-                            android:textColor="#3F51B5"
-                            android:layout_marginStart="10dp"/>
+                            android:textColor="@color/color_primary"
+                            android:layout_marginStart="10dp" />
                     </LinearLayout>
 
-                    <!-- Texto resultado -->
                     <TextView
                         android:id="@+id/tvAiResult"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Captura tu plato y pulsa Analizar IA para obtener los gramos de hidratos de carbono y el número de raciones."
                         android:textSize="15sp"
-                        android:textColor="#424242"
+                        android:textColor="@color/color_text_primary"
                         android:lineSpacingExtra="6dp"
-                        android:padding="20dp"/>
+                        android:padding="20dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
