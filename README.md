@@ -18,7 +18,7 @@ Aplicación Android para la gestión de diabetes tipo 1. Permite calcular dosis 
 | Lenguaje | Kotlin |
 | Auth & Base de datos | Firebase Auth + Firestore |
 | API glucosa | LibreLinkUp (Retrofit 2) |
-| IA | Google Generative AI SDK — Gemini 1.5 Flash |
+| IA | Google Generative AI SDK — Gemini 2.5 Flash |
 | Anuncios | Google AdMob |
 | UI | Material Design 3, AndroidX |
 
