@@ -7,6 +7,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,7 +45,7 @@ class BoloActivity : AppCompatActivity() {
         val etRaciones = findViewById<EditText>(R.id.etRaciones)
         // Eliminamos etObjetivo: El usuario ya no tiene que escribirlo a mano
 
-        val btnCalcular = findViewById<MaterialCardView>(R.id.btnCalcular)
+        val btnCalcular = findViewById<MaterialButton>(R.id.btnCalcular)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
 
         // Referencias Resultado

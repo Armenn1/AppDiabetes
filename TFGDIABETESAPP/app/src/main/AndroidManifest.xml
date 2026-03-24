@@ -35,9 +35,6 @@
         </receiver>
 
         <activity
-            android:name=".MainActivity2"
-            android:exported="false" />
-        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
