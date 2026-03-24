@@ -1,164 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
+    android:orientation="vertical"
+    android:background="@color/color_background"
     tools:context=".fragments.SettingsFragment">
 
+    <!-- Colored header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="32dp"
-        android:paddingTop="32dp"
-        android:paddingBottom="32dp">
+        android:background="@color/color_primary"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="48dp"
+        android:orientation="vertical">
 
-        <!-- Sección Médica -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Configuración Médica"
-            android:textSize="24sp"
+            android:text="Configuración"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_gravity="center"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Estos valores son necesarios para calcular tu bolo."
-            android:textSize="14sp"
-            android:textColor="#757575"
-            android:gravity="center"
-            android:layout_marginBottom="24dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ratio HC (U/ración)"
-            android:layout_marginBottom="8dp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etFactorHC"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@android:drawable/editbox_background"
-            android:hint="Ej: 1.5"
-            android:inputType="numberDecimal"
-            android:paddingHorizontal="16dp" />
-
-        <Space android:layout_width="match_parent" android:layout_height="24dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sensibilidad (mg/dl por U)"
-            android:layout_marginBottom="8dp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etSensibilidad"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@android:drawable/editbox_background"
-            android:hint="Ej: 50"
-            android:inputType="numberDecimal"
-            android:paddingHorizontal="16dp" />
-
-        <Space android:layout_width="match_parent" android:layout_height="24dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Objetivo de glucosa (mg/dl)"
-            android:layout_marginBottom="8dp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etObjetivo"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@android:drawable/editbox_background"
-            android:hint="Ej: 100"
-            android:inputType="numberDecimal"
-            android:paddingHorizontal="16dp" />
-
-        <Space android:layout_width="match_parent" android:layout_height="32dp" />
-
-        <!-- Divisor -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginBottom="32dp"/>
-
-        <!-- Sección LibreLinkUp -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cuenta LibreLinkUp"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_gravity="center"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Introduce las credenciales de tu cuenta LibreLinkUp para ver tu glucosa en tiempo real."
-            android:textSize="14sp"
-            android:textColor="#757575"
-            android:gravity="center"
-            android:layout_marginBottom="24dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email de LibreLinkUp"
-            android:layout_marginBottom="8dp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etLibreEmail"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@android:drawable/editbox_background"
-            android:hint="usuario@ejemplo.com"
-            android:inputType="textEmailAddress"
-            android:paddingHorizontal="16dp" />
-
-        <Space android:layout_width="match_parent" android:layout_height="24dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Contraseña de LibreLinkUp"
-            android:layout_marginBottom="8dp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etLibrePassword"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@android:drawable/editbox_background"
-            android:hint="Contraseña"
-            android:inputType="textPassword"
-            android:paddingHorizontal="16dp" />
-
-        <Space android:layout_width="match_parent" android:layout_height="32dp" />
-
-        <Button
-            android:id="@+id/btnSaveSettings"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:backgroundTint="#6200EE"
-            android:text="Guardar Configuración"
             android:textColor="#FFFFFF" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ajusta tus parámetros médicos"
+            android:textSize="13sp"
+            android:textColor="#BBDEFB"
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
-</ScrollView>
+    <!-- Scrollable content overlapping header -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="-24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="32dp">
+
+            <!-- Medical section card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/color_surface"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Configuración Médica"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/color_text_primary"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Necesarios para calcular tu bolo de insulina."
+                        android:textSize="13sp"
+                        android:textColor="@color/color_text_secondary"
+                        android:layout_marginBottom="20dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Ratio HC (U/ración)"
+                        android:layout_marginBottom="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etFactorHC"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Sensibilidad (mg/dL por U)"
+                        android:layout_marginBottom="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSensibilidad"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Objetivo de glucosa (mg/dL)">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etObjetivo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- LibreLinkUp section card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/color_surface"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cuenta LibreLinkUp"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/color_text_primary"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Credenciales para ver tu glucosa en tiempo real."
+                        android:textSize="13sp"
+                        android:textColor="@color/color_text_secondary"
+                        android:layout_marginBottom="20dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Email de LibreLinkUp"
+                        android:layout_marginBottom="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLibreEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textEmailAddress" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Contraseña de LibreLinkUp"
+                        app:endIconMode="password_toggle">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLibrePassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Save button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveSettings"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Guardar Configuración"
+                android:textSize="16sp"
+                app:cornerRadius="10dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

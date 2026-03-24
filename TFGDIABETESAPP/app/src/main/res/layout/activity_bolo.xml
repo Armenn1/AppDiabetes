@@ -1,149 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
+    android:orientation="vertical"
+    android:background="@color/color_background"
     tools:context=".BoloActivity">
 
-    <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Volver"
-        android:src="@android:drawable/ic_menu_revert"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="#333333" />
-
+    <!-- Colored header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3"> <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Calculadora"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="#333333"
-        android:layout_marginBottom="32dp"/>
+        android:background="@color/color_primary"
+        android:paddingStart="16dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="48dp"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Volver"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Glucosa Actual (mg/dL)"
-            android:layout_marginBottom="8dp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etGlucosaActual"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@android:drawable/editbox_background"
-            android:hint="Ej: 180"
-            android:inputType="number"
-            android:paddingHorizontal="16dp" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="24dp" />
+            android:text="Calculadora"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Raciones de Hidratos (10g)"
-            android:layout_marginBottom="8dp"
-            android:textColor="#333333"/>
+            android:text="Calcula tu dosis de insulina"
+            android:textSize="13sp"
+            android:textColor="#BBDEFB"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
 
-        <EditText
-            android:id="@+id/etRaciones"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@android:drawable/editbox_background"
-            android:hint="Ej: 4"
-            android:inputType="numberDecimal"
-            android:paddingHorizontal="16dp" />
+    <!-- Scrollable content overlapping header -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="-24dp">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="32dp" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/btnCalcular"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            app:cardCornerRadius="8dp"
-            app:cardBackgroundColor="#6200EE"
-            app:cardElevation="4dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Calcular Dosis"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_gravity="center"/>
-        </com.google.android.material.card.MaterialCardView>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="32dp" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0"
-            app:cardBackgroundColor="#FFFFFF"
-            android:visibility="gone"> <LinearLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp"
-            android:gravity="center">
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="32dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Input card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Dosis Recomendada"
-                android:textColor="#757575"
-                android:textSize="14sp"/>
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/color_surface"
+                android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/tvTotalDosis"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0.0 U"
-                android:textColor="#6200EE"
-                android:textStyle="bold"
-                android:textSize="48sp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-            <TextView
-                android:id="@+id/tvDesglose"
-                android:layout_width="wrap_content"
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Glucosa actual (mg/dL)"
+                        android:layout_marginBottom="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etGlucosaActual"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Raciones de hidratos (10 g)"
+                        android:layout_marginBottom="20dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etRaciones"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCalcular"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:text="Calcular Dosis"
+                        android:textSize="16sp"
+                        app:cornerRadius="10dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Result card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardResult"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="(Comida: 0.0 + Corrección: 0.0)"
-                android:textColor="#9E9E9E"
-                android:textSize="12sp"
-                android:layout_marginTop="8dp"/>
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/color_surface"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dosis Recomendada"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvTotalDosis"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0 U"
+                        android:textColor="@color/color_primary"
+                        android:textStyle="bold"
+                        android:textSize="52sp"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvDesglose"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(Comida: 0.0 + Corrección: 0.0)"
+                        android:textColor="@color/color_text_hint"
+                        android:textSize="13sp"
+                        android:layout_marginTop="8dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+    </androidx.core.widget.NestedScrollView>
 
-    </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

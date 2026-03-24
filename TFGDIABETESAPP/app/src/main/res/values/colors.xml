@@ -1,8 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Core -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary – Medical Blue -->
+    <color name="color_primary">#1976D2</color>
+    <color name="color_primary_dark">#1565C0</color>
+    <color name="color_primary_light">#DBEAFE</color>
+    <color name="color_on_primary">#FFFFFF</color>
+
+    <!-- Secondary – informational cyan -->
+    <color name="color_secondary">#0288D1</color>
+    <color name="color_on_secondary">#FFFFFF</color>
+
+    <!-- Backgrounds -->
+    <color name="color_background">#F4F7FB</color>
+    <color name="color_surface">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="color_text_primary">#1A1C1E</color>
+    <color name="color_text_secondary">#6B7280</color>
+    <color name="color_text_hint">#9CA3AF</color>
+
+    <!-- Status -->
     <color name="green_ok">#4CAF50</color>
+    <color name="color_success">#4CAF50</color>
+    <color name="color_warning">#FF9800</color>
+    <color name="color_error">#EF5350</color>
+
+    <!-- UI -->
+    <color name="color_divider">#E5E7EB</color>
+
+    <!-- Legacy kept for compatibility -->
     <color name="light_blue_50">#FFE1F5FE</color>
     <color name="light_blue_200">#FF81D4FA</color>
     <color name="light_blue_600">#FF039BE5</color>

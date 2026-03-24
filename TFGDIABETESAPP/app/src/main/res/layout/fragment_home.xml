@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:background="@color/color_background"
+    tools:context=".fragments.HomeFragment">
 
+    <!-- Colored header -->
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/color_primary"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="48dp"
         android:orientation="horizontal"
-        android:padding="24dp"
-        android:gravity="center_vertical"
-        app:layout_constraintTop_toTopOf="parent">
+        android:gravity="center_vertical">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -27,47 +31,50 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Hola, Roc"
-                android:textSize="26sp"
+                android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#333333"/>
+                android:textColor="#FFFFFF" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Estado actual"
-                android:textSize="14sp"
-                android:textColor="#757575"/>
+                android:textSize="13sp"
+                android:textColor="#BBDEFB"
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnLogout"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_lock_power_off"
-            app:tint="#D32F2F"
+            app:tint="#FFCDD2"
             android:contentDescription="Cerrar Sesión" />
     </LinearLayout>
 
-    <ScrollView
+    <!-- Scrollable content overlapping header -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+        android:layout_weight="1"
+        android:layout_marginTop="-24dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
+            android:paddingHorizontal="20dp"
             android:paddingBottom="24dp">
 
+            <!-- Glucose card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/color_surface"
                 android:layout_marginBottom="16dp">
 
                 <LinearLayout
@@ -87,39 +94,40 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Glucosa en Tiempo Real"
-                            android:textColor="#757575"
-                            android:textSize="14sp"/>
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="13sp" />
 
                         <ProgressBar
                             android:id="@+id/pbGlucoseLoading"
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:layout_marginStart="8dp"
-                            android:visibility="gone"/>
+                            android:visibility="gone" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="bottom">
+                        android:gravity="bottom"
+                        android:layout_marginTop="8dp">
 
                         <TextView
                             android:id="@+id/tvGlucosaMain"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="--"
-                            android:textColor="#333333"
-                            android:textSize="56sp"
-                            android:textStyle="bold"/>
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="60sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=" mg/dL"
-                            android:textColor="#757575"
+                            android:textColor="@color/color_text_secondary"
                             android:textSize="18sp"
-                            android:layout_marginBottom="12dp"/>
+                            android:layout_marginBottom="14dp" />
                     </LinearLayout>
 
                     <TextView
@@ -127,12 +135,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Conectando..."
-                        android:textColor="#9E9E9E"
+                        android:textColor="@color/color_text_hint"
                         android:textSize="12sp"
-                        android:layout_marginTop="4dp"/>
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- IOB + Basal -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -145,7 +154,7 @@
                     android:layout_weight="1"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="@color/color_surface"
                     android:layout_marginEnd="8dp">
 
                     <LinearLayout
@@ -159,7 +168,7 @@
                             android:layout_height="wrap_content"
                             android:text="IOB (Activa)"
                             android:textSize="12sp"
-                            android:textColor="#757575"/>
+                            android:textColor="@color/color_text_secondary" />
 
                         <TextView
                             android:id="@+id/tvIOB"
@@ -168,7 +177,7 @@
                             android:text="1.2 U"
                             android:textSize="22sp"
                             android:textStyle="bold"
-                            android:textColor="#6200EE"/>
+                            android:textColor="@color/color_primary" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -178,7 +187,7 @@
                     android:layout_weight="1"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="@color/color_surface"
                     android:layout_marginStart="8dp">
 
                     <LinearLayout
@@ -192,7 +201,7 @@
                             android:layout_height="wrap_content"
                             android:text="Basal (Lenta)"
                             android:textSize="12sp"
-                            android:textColor="#757575"/>
+                            android:textColor="@color/color_text_secondary" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -200,19 +209,20 @@
                             android:text="24 U"
                             android:textSize="22sp"
                             android:textStyle="bold"
-                            android:textColor="#0091EA"/>
+                            android:textColor="@color/color_secondary" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
+            <!-- Quick Actions -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Acciones Rápidas"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:textStyle="bold"
-                android:textColor="#333333"
-                android:layout_marginBottom="16dp"/>
+                android:textColor="@color/color_text_primary"
+                android:layout_marginBottom="12dp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardNewBolo"
@@ -220,7 +230,7 @@
                 android:layout_height="80dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
-                app:cardBackgroundColor="#6200EE"
+                app:cardBackgroundColor="@color/color_primary"
                 android:clickable="true"
                 android:focusable="true"
                 android:layout_marginBottom="16dp">
@@ -237,33 +247,32 @@
                         android:text="+"
                         android:textSize="32sp"
                         android:textColor="#FFFFFF"
-                        android:layout_marginEnd="16dp"/>
+                        android:layout_marginEnd="16dp" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Calcular Nuevo Bolo"
                             android:textColor="#FFFFFF"
                             android:textStyle="bold"
-                            android:textSize="18sp"/>
+                            android:textSize="17sp" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Registrar comida e insulina"
-                            android:textColor="#E0E0E0"
-                            android:textSize="12sp"/>
+                            android:textColor="#BBDEFB"
+                            android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
-
-
-
-
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-    </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
