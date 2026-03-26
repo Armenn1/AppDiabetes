@@ -7,6 +7,12 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
@@ -18,6 +24,9 @@ class BoloActivity : AppCompatActivity() {
     // Firebase
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+
+    // AdMob
+    private var interstitialAd: InterstitialAd? = null
 
     // Variables médicas (Se rellenan desde Firebase)
     private var myRatio: Double = 0.0
@@ -39,6 +48,9 @@ class BoloActivity : AppCompatActivity() {
             return
         }
         setContentView(R.layout.activity_bolo)
+
+        MobileAds.initialize(this)
+        loadInterstitialAd()
 
         // Referencias UI
         val etGlucosa = findViewById<EditText>(R.id.etGlucosaActual)
@@ -128,6 +140,7 @@ class BoloActivity : AppCompatActivity() {
 
                 // --- C) GUARDAR ---
                 saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRedondeado)
+                showInterstitialAd()
 
             } else {
                 Toast.makeText(this, "Rellena glucosa y raciones", Toast.LENGTH_SHORT).show()
@@ -167,6 +180,34 @@ class BoloActivity : AppCompatActivity() {
             .addOnFailureListener {
                 Toast.makeText(this, "Error de conexión", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun loadInterstitialAd() {
+        InterstitialAd.load(
+            this,
+            "ca-app-pub-3940256099942544/1033173712", // TODO: reemplaza con tu ad unit ID real
+            AdRequest.Builder().build(),
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    interstitialAd = ad
+                }
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    interstitialAd = null
+                }
+            }
+        )
+    }
+
+    private fun showInterstitialAd() {
+        interstitialAd?.let { ad ->
+            ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                override fun onAdDismissedFullScreenContent() {
+                    interstitialAd = null
+                    loadInterstitialAd()
+                }
+            }
+            ad.show(this)
+        }
     }
 
     private fun saveLogToFirebase(glucosa: Double, raciones: Double, comida: Double, correccion: Double, total: Double) {
