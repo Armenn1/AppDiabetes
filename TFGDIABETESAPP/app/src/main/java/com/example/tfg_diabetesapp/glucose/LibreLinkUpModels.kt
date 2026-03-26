@@ -48,7 +48,14 @@ data class GlucoseResponse(
 )
 
 data class GraphData(
-    val connection: ConnectionDetails?
+    val connection: ConnectionDetails?,
+    val graphData: List<GlucoseMeasurement>?
+)
+
+// Resultado combinado: glucosa actual + histórico del día
+data class GlucoseResult(
+    val currentValue: Int,
+    val graphMeasurements: List<GlucoseMeasurement>
 )
 
 data class ConnectionDetails(

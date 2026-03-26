@@ -91,4 +91,37 @@ object LibreLinkUpRepository {
             return null
         }
     }
+
+    suspend fun getGlucoseData(email: String, pass: String): GlucoseResult? {
+        try {
+            val loginRes = api.login(request = LoginRequest(email, pass))
+            if (!loginRes.isSuccessful || loginRes.body()?.data == null) return null
+
+            val bearerToken = "Bearer ${loginRes.body()!!.data!!.authTicket.token}"
+            val hashedAccountId = hashSHA256(loginRes.body()!!.data!!.user.id)
+
+            val connRes = api.getConnections(token = bearerToken, accountId = hashedAccountId)
+            if (!connRes.isSuccessful || connRes.body()?.data.isNullOrEmpty()) return null
+
+            val patientId = connRes.body()!!.data!![0].patientId
+            val glucoseRes = api.getGlucoseGraph(
+                token = bearerToken,
+                accountId = hashedAccountId,
+                patientId = patientId
+            )
+
+            if (!glucoseRes.isSuccessful) return null
+
+            val graphData = glucoseRes.body()?.data ?: return null
+            val currentValue = graphData.connection?.glucoseMeasurement?.value ?: return null
+            val history = graphData.graphData ?: emptyList()
+
+            Log.d("LibreAPI", "Glucosa: $currentValue | Puntos gráfica: ${history.size}")
+            return GlucoseResult(currentValue, history)
+
+        } catch (e: Exception) {
+            Log.e("LibreAPI", "Error en getGlucoseData: ${e.message}")
+            return null
+        }
+    }
 }

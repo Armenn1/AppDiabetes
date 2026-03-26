@@ -1,6 +1,7 @@
 package com.example.tfg_diabetesapp.fragments
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,13 @@ import androidx.lifecycle.lifecycleScope
 import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.LoginActivity
 import com.example.tfg_diabetesapp.R
+import com.example.tfg_diabetesapp.glucose.GlucoseMeasurement
 import com.example.tfg_diabetesapp.glucose.LibreLinkUpRepository
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.LimitLine
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -39,6 +46,7 @@ class HomeFragment : Fragment() {
     private lateinit var tvIOB: TextView
     private lateinit var tvLastUpdated: TextView
     private lateinit var pbGlucoseLoading: ProgressBar
+    private lateinit var glucoseChart: LineChart
 
     // Credenciales LibreLinkUp (se cargan desde Firestore)
     private var libreEmail = ""
@@ -59,6 +67,8 @@ class HomeFragment : Fragment() {
         tvIOB = view.findViewById(R.id.tvIOB)
         tvLastUpdated = view.findViewById(R.id.tvLastUpdated)
         pbGlucoseLoading = view.findViewById(R.id.pbGlucoseLoading)
+        glucoseChart = view.findViewById(R.id.glucoseChart)
+        setupGlucoseChart()
 
         cardNewBolo.setOnClickListener {
             startActivity(Intent(requireContext(), BoloActivity::class.java))
@@ -75,11 +85,19 @@ class HomeFragment : Fragment() {
         // Cargar credenciales y lanzar fetch inmediato al arrancar
         loadLibreCredentials(fetchAfterLoad = true)
 
-        // Bucle de auto-actualización: fetch glucosa cada 60 segundos
+        // Loop número: cada 60 segundos
         viewLifecycleOwner.lifecycleScope.launch {
             while (isActive) {
-                fetchGlucoseFromLibre()
+                fetchGlucoseNumber()
                 delay(60_000L)
+            }
+        }
+
+        // Loop gráfico: al entrar y luego cada 10 minutos
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (isActive) {
+                fetchGlucoseChart()
+                delay(600_000L)
             }
         }
 
@@ -105,14 +123,14 @@ class HomeFragment : Fragment() {
                 librePassword = newPassword
                 // Si se pidió fetch inmediato o las credenciales cambiaron, actualizar glucosa ahora
                 if ((fetchAfterLoad || credentialsChanged) && libreEmail.isNotEmpty()) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        fetchGlucoseFromLibre()
-                    }
+                    viewLifecycleOwner.lifecycleScope.launch { fetchGlucoseNumber() }
+                    viewLifecycleOwner.lifecycleScope.launch { fetchGlucoseChart() }
                 }
             }
     }
 
-    private suspend fun fetchGlucoseFromLibre() {
+    // Actualiza solo el número de glucosa (cada 60s)
+    private suspend fun fetchGlucoseNumber() {
         if (libreEmail.isEmpty() || librePassword.isEmpty()) {
             withContext(Dispatchers.Main) {
                 tvGlucosa.text = "--"
@@ -121,18 +139,16 @@ class HomeFragment : Fragment() {
             return
         }
 
-        withContext(Dispatchers.Main) {
-            pbGlucoseLoading.visibility = View.VISIBLE
-        }
+        withContext(Dispatchers.Main) { pbGlucoseLoading.visibility = View.VISIBLE }
 
-        val glucoseResult = withContext(Dispatchers.IO) {
+        val value = withContext(Dispatchers.IO) {
             LibreLinkUpRepository.getLatestGlucose(libreEmail, librePassword)
         }
 
         withContext(Dispatchers.Main) {
             pbGlucoseLoading.visibility = View.GONE
-            if (glucoseResult != null) {
-                updateGlucoseCard(glucoseResult.toDouble())
+            if (value != null) {
+                updateGlucoseCard(value.toDouble())
                 val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                 tvLastUpdated.text = "Última act. $hora"
             } else {
@@ -140,6 +156,90 @@ class HomeFragment : Fragment() {
                 tvLastUpdated.text = "Error de conexión"
             }
         }
+    }
+
+    // Actualiza el gráfico (al entrar + cada 10 min)
+    private suspend fun fetchGlucoseChart() {
+        if (libreEmail.isEmpty() || librePassword.isEmpty()) return
+
+        val result = withContext(Dispatchers.IO) {
+            LibreLinkUpRepository.getGlucoseData(libreEmail, librePassword)
+        }
+
+        withContext(Dispatchers.Main) {
+            if (result != null) updateGlucoseChart(result.graphMeasurements)
+        }
+    }
+
+    private fun setupGlucoseChart() {
+        glucoseChart.apply {
+            description.isEnabled = false
+            setTouchEnabled(false)
+            isDragEnabled = false
+            setScaleEnabled(false)
+            setPinchZoom(false)
+            setDrawGridBackground(false)
+            setBackgroundColor(Color.TRANSPARENT)
+            legend.isEnabled = false
+
+            xAxis.apply {
+                setDrawGridLines(false)
+                setDrawAxisLine(false)
+                setDrawLabels(false)
+            }
+
+            axisLeft.apply {
+                setDrawGridLines(false)
+                setDrawAxisLine(false)
+                textColor = Color.GRAY
+                textSize = 9f
+                axisMinimum = 40f
+                axisMaximum = 300f
+
+                val targetGreen = Color.parseColor("#4CAF50")
+
+                val lowLine = LimitLine(70f, "70").apply {
+                    lineWidth = 1.5f
+                    lineColor = targetGreen
+                    enableDashedLine(10f, 6f, 0f)
+                    textColor = targetGreen
+                    textSize = 9f
+                }
+                val highLine = LimitLine(180f, "180").apply {
+                    lineWidth = 1.5f
+                    lineColor = targetGreen
+                    enableDashedLine(10f, 6f, 0f)
+                    textColor = targetGreen
+                    textSize = 9f
+                }
+                addLimitLine(lowLine)
+                addLimitLine(highLine)
+                setDrawLimitLinesBehindData(true)
+            }
+
+            axisRight.isEnabled = false
+        }
+    }
+
+    private fun updateGlucoseChart(measurements: List<GlucoseMeasurement>) {
+        if (measurements.isEmpty()) return
+
+        val entries = measurements.mapIndexed { index, m ->
+            Entry(index.toFloat(), m.value.toFloat())
+        }
+
+        val dataSet = LineDataSet(entries, "Glucosa").apply {
+            color = Color.WHITE
+            lineWidth = 2.5f
+            setDrawCircles(false)
+            setDrawValues(false)
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            cubicIntensity = 0.2f
+            setDrawFilled(false)
+        }
+
+        glucoseChart.data = LineData(dataSet)
+        glucoseChart.invalidate()
     }
 
     private fun refreshIobData() {
