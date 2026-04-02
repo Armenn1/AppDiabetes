@@ -52,6 +52,9 @@ class HomeFragment : Fragment() {
     private var libreEmail = ""
     private var librePassword = ""
 
+    // Último valor de glucosa conocido (para mostrar si la API falla)
+    private var lastKnownGlucose: Int? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -148,9 +151,13 @@ class HomeFragment : Fragment() {
         withContext(Dispatchers.Main) {
             pbGlucoseLoading.visibility = View.GONE
             if (value != null) {
-                updateGlucoseCard(value.toDouble())
+                lastKnownGlucose = value
+                updateGlucoseCard(value.toDouble(), stale = false)
                 val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                 tvLastUpdated.text = "Última act. $hora"
+            } else if (lastKnownGlucose != null) {
+                updateGlucoseCard(lastKnownGlucose!!.toDouble(), stale = true)
+                tvLastUpdated.text = "Sin conexión · último dato"
             } else {
                 tvGlucosa.text = "--"
                 tvLastUpdated.text = "Error de conexión"
@@ -228,14 +235,18 @@ class HomeFragment : Fragment() {
             Entry(index.toFloat(), m.value.toFloat())
         }
 
+        val lineColor = Color.parseColor("#29B6F6") // azul claro
+
         val dataSet = LineDataSet(entries, "Glucosa").apply {
-            color = Color.WHITE
+            color = lineColor
             lineWidth = 2.5f
             setDrawCircles(false)
             setDrawValues(false)
             mode = LineDataSet.Mode.CUBIC_BEZIER
             cubicIntensity = 0.2f
-            setDrawFilled(false)
+            setDrawFilled(true)
+            fillColor = lineColor
+            fillAlpha = 40
         }
 
         glucoseChart.data = LineData(dataSet)
@@ -262,13 +273,14 @@ class HomeFragment : Fragment() {
             }
     }
 
-    private fun updateGlucoseCard(glucosa: Double) {
+    private fun updateGlucoseCard(glucosa: Double, stale: Boolean = false) {
         tvGlucosa.text = glucosa.roundToInt().toString()
 
         val color = when {
+            stale -> android.R.color.darker_gray
             glucosa < 70 -> android.R.color.holo_red_light
             glucosa > 180 -> android.R.color.holo_orange_light
-            else -> android.R.color.darker_gray
+            else -> R.color.green_ok
         }
 
         tvGlucosa.setTextColor(ContextCompat.getColor(requireContext(), color))
