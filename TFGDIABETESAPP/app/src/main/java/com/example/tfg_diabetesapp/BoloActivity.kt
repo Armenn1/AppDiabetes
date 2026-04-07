@@ -68,6 +68,12 @@ class BoloActivity : AppCompatActivity() {
         // 1. CARGAR DATOS NADA MÁS ENTRAR
         loadMedicalSettings()
 
+        // Pre-rellenar raciones si vienen del escáner IA
+        val racionesIA = intent.getDoubleExtra("raciones", -1.0)
+        if (racionesIA > 0) {
+            etRaciones.setText(racionesIA.toString())
+        }
+
         // 2. LÓGICA DEL BOTÓN CALCULAR
         btnCalcular.setOnClickListener {
             // Seguridad

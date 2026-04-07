@@ -1,6 +1,7 @@
 package com.example.tfg_diabetesapp.fragments
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -15,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.BuildConfig
 import com.example.tfg_diabetesapp.R
 import com.google.ai.client.generativeai.GenerativeModel
@@ -30,10 +32,12 @@ class ScannerFragment : Fragment() {
     private lateinit var layoutPlaceholder: LinearLayout
     private lateinit var btnTakePhoto: MaterialButton
     private lateinit var btnAnalyze: MaterialButton
+    private lateinit var btnUsarEnCalculadora: MaterialButton
     private lateinit var tvAiResult: TextView
     private lateinit var layoutLoading: LinearLayout
 
     private var imageBitmap: Bitmap? = null
+    private var extractedRaciones: Double? = null
 
     private val takePicturePreview = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         if (bitmap != null) {
@@ -42,6 +46,8 @@ class ScannerFragment : Fragment() {
             ivFoodPhoto.visibility = View.VISIBLE
             ivFoodPhoto.setImageBitmap(bitmap)
             btnAnalyze.isEnabled = true
+            extractedRaciones = null
+            btnUsarEnCalculadora.visibility = View.GONE
         } else {
             Toast.makeText(requireContext(), "Foto cancelada", Toast.LENGTH_SHORT).show()
         }
@@ -65,6 +71,7 @@ class ScannerFragment : Fragment() {
         layoutPlaceholder = view.findViewById(R.id.layoutPlaceholder)
         btnTakePhoto = view.findViewById(R.id.btnTakePhoto)
         btnAnalyze = view.findViewById(R.id.btnAnalyze)
+        btnUsarEnCalculadora = view.findViewById(R.id.btnUsarEnCalculadora)
         tvAiResult = view.findViewById(R.id.tvAiResult)
         layoutLoading = view.findViewById(R.id.layoutLoading)
 
@@ -78,6 +85,13 @@ class ScannerFragment : Fragment() {
 
         btnAnalyze.setOnClickListener {
             imageBitmap?.let { analyzeImageWithGemini(it) }
+        }
+
+        btnUsarEnCalculadora.setOnClickListener {
+            val raciones = extractedRaciones ?: return@setOnClickListener
+            val intent = Intent(requireContext(), BoloActivity::class.java)
+            intent.putExtra("raciones", raciones)
+            startActivity(intent)
         }
 
         return view
@@ -98,16 +112,29 @@ class ScannerFragment : Fragment() {
 
                 val inputContent = content {
                     image(bitmap)
-                    text("Actúa como un nutricionista experto en diabetes tipo 1. Mira esta foto y dime qué comida principal ves. Luego, estima los gramos totales de Hidratos de Carbono (HC) de esa ración. Sé directo. Termina diciendo cuántas raciones son (1 ración = 10g de HC). Responde únicamente con qué comida es, la cantidad de carbohidratos y las raciones. Respuesta breve.")
+                    text("Actúa como un nutricionista experto en diabetes tipo 1. Mira esta foto y dime qué comida principal ves. Estima los gramos totales de Hidratos de Carbono (HC) de esa ración. Sé directo y breve. Al final de tu respuesta, en una línea aparte, escribe EXACTAMENTE en este formato (sin texto adicional): RACIONES: X (donde X es el número decimal de raciones de 10g de HC, por ejemplo: RACIONES: 3.5)")
                 }
 
                 val response = generativeModel.generateContent(inputContent)
+                val responseText = response.text ?: ""
+
+                // Extraer raciones del formato "RACIONES: X"
+                val racionesMatch = Regex("RACIONES:\\s*(\\d+(?:[.,]\\d+)?)").find(responseText)
+                val raciones = racionesMatch?.groupValues?.get(1)?.replace(',', '.')?.toDoubleOrNull()
 
                 withContext(Dispatchers.Main) {
                     layoutLoading.visibility = View.GONE
-                    tvAiResult.text = response.text
+                    tvAiResult.text = responseText
                     btnAnalyze.isEnabled = true
                     btnTakePhoto.isEnabled = true
+
+                    if (raciones != null) {
+                        extractedRaciones = raciones
+                        btnUsarEnCalculadora.visibility = View.VISIBLE
+                    } else {
+                        extractedRaciones = null
+                        btnUsarEnCalculadora.visibility = View.GONE
+                    }
                 }
 
             } catch (e: Exception) {
