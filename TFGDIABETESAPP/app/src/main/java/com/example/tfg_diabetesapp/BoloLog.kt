@@ -7,5 +7,6 @@ data class BoloLog(
     val dosisComida: Double = 0.0,
     val dosisCorreccion: Double = 0.0,
     val dosisTotal: Double = 0.0,
+    val iobDescontado: Double = 0.0, // IOB restado al calcular el bolo
     val tipo: String = "Calculadora" // Por si luego añades entradas manuales
 )

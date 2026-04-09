@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.tfg_diabetesapp.BoloActivity
+import com.example.tfg_diabetesapp.BoloLog
+import com.example.tfg_diabetesapp.IobCalculator
 import com.example.tfg_diabetesapp.LoginActivity
 import com.example.tfg_diabetesapp.R
 import com.example.tfg_diabetesapp.glucose.GlucoseMeasurement
@@ -25,7 +27,6 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -34,7 +35,6 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 class HomeFragment : Fragment() {
@@ -51,6 +51,9 @@ class HomeFragment : Fragment() {
     // Credenciales LibreLinkUp (se cargan desde Firestore)
     private var libreEmail = ""
     private var librePassword = ""
+
+    // DIA de la insulina en horas (se carga desde Firestore, default 4h)
+    private var diaHoras: Double = 4.0
 
     // Último valor de glucosa conocido (para mostrar si la API falla)
     private var lastKnownGlucose: Int? = null
@@ -121,6 +124,7 @@ class HomeFragment : Fragment() {
             .addOnSuccessListener { document ->
                 val newEmail = document.getString("libreEmail") ?: ""
                 val newPassword = document.getString("librePassword") ?: ""
+                diaHoras = document.getDouble("diaHoras") ?: 4.0
                 val credentialsChanged = newEmail != libreEmail || newPassword != librePassword
                 libreEmail = newEmail
                 librePassword = newPassword
@@ -255,21 +259,27 @@ class HomeFragment : Fragment() {
 
     private fun refreshIobData() {
         val userId = auth.currentUser?.uid ?: return
+        val diaMs = (diaHoras * 3_600_000).toLong()
+        val cutoff = System.currentTimeMillis() - diaMs
 
         db.collection("users").document(userId)
             .collection("history")
-            .orderBy("fecha", Query.Direction.DESCENDING)
-            .limit(1)
+            .whereGreaterThan("fecha", cutoff)
             .get()
             .addOnSuccessListener { documents ->
-                if (!documents.isEmpty) {
-                    val lastLog = documents.documents[0]
-                    val dosisTotal = lastLog.getDouble("dosisTotal") ?: 0.0
-                    val fechaLog = lastLog.getLong("fecha") ?: System.currentTimeMillis()
-                    calculateAndShowIOB(dosisTotal, fechaLog)
-                } else {
-                    tvIOB.text = "0.0 U"
+                val logs = documents.map { doc ->
+                    BoloLog(
+                        fecha = doc.getLong("fecha") ?: 0L,
+                        dosisTotal = doc.getDouble("dosisTotal") ?: 0.0
+                    )
                 }
+                val diaMinutos = (diaHoras * 60).toInt()
+                val iob = IobCalculator.calcular(logs, diaMinutos)
+                val iobRed = (iob * 10.0).roundToInt() / 10.0
+                tvIOB.text = "$iobRed U"
+            }
+            .addOnFailureListener {
+                tvIOB.text = "0.0 U"
             }
     }
 
@@ -286,18 +296,4 @@ class HomeFragment : Fragment() {
         tvGlucosa.setTextColor(ContextCompat.getColor(requireContext(), color))
     }
 
-    private fun calculateAndShowIOB(dosis: Double, fechaLog: Long) {
-        val ahora = System.currentTimeMillis()
-        val minutosPasados = TimeUnit.MILLISECONDS.toMinutes(ahora - fechaLog)
-
-        if (minutosPasados >= 240) {
-            tvIOB.text = "0.0 U"
-        } else {
-            val factorRestante = 1.0 - (minutosPasados.toDouble() / 240.0)
-            var iob = dosis * factorRestante
-            if (iob < 0) iob = 0.0
-            val iobRedondeado = (iob * 10.0).roundToInt() / 10.0
-            tvIOB.text = "$iobRedondeado U"
-        }
-    }
 }
