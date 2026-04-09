@@ -31,10 +31,13 @@ class BoloActivity : AppCompatActivity() {
     // Variables médicas (Se rellenan desde Firebase)
     private var myRatio: Double = 0.0
     private var mySensibilidad: Double = 0.0
-    // Objetivo personal (Por defecto 100 si falla la carga)
     private var myTarget: Double = 100.0
+    private var myDia: Double = 4.0
 
-    private var dataLoaded = false // Semáforo
+    // IOB activo al abrir la calculadora
+    private var currentIob: Double = 0.0
+
+    private var dataLoaded = false // Semáforo: true cuando settings + IOB están listos
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +58,6 @@ class BoloActivity : AppCompatActivity() {
         // Referencias UI
         val etGlucosa = findViewById<EditText>(R.id.etGlucosaActual)
         val etRaciones = findViewById<EditText>(R.id.etRaciones)
-        // Eliminamos etObjetivo: El usuario ya no tiene que escribirlo a mano
 
         val btnCalcular = findViewById<MaterialButton>(R.id.btnCalcular)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
@@ -65,12 +67,11 @@ class BoloActivity : AppCompatActivity() {
         val tvTotal = findViewById<TextView>(R.id.tvTotalDosis)
         val tvDesglose = findViewById<TextView>(R.id.tvDesglose)
 
-        // 1. CARGAR DATOS NADA MÁS ENTRAR
+        // 1. CARGAR DATOS (settings → IOB) NADA MÁS ENTRAR
         loadMedicalSettings()
 
         // 2. LÓGICA DEL BOTÓN CALCULAR
         btnCalcular.setOnClickListener {
-            // Seguridad
             if (!dataLoaded) {
                 Toast.makeText(this, "Cargando tus ajustes médicos...", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -86,7 +87,6 @@ class BoloActivity : AppCompatActivity() {
                 // --- A) SEGURIDAD: DETECTAR HIPOGLUCEMIA ---
                 if (glucosa < 70) {
                     cardResult.visibility = View.VISIBLE
-                    // Color Rojo Alerta
                     cardResult.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.holo_red_light))
 
                     tvTotal.text = "HIPO"
@@ -95,51 +95,53 @@ class BoloActivity : AppCompatActivity() {
                     tvDesglose.text = "¡PELIGRO! Glucosa baja.\nIngiere azúcares rápidos y NO te inyectes."
                     tvDesglose.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
 
-                    // Guardamos el evento con 0 insulina por seguridad
                     saveLogToFirebase(glucosa, raciones, 0.0, 0.0, 0.0)
 
-                    return@setOnClickListener // STOP
+                    return@setOnClickListener
                 }
 
-                // --- B) CÁLCULO AVANZADO (Con Objetivo Personalizado) ---
+                // --- B) CÁLCULO CON IOB ---
 
-                // 1. Restauramos colores (Blanco)
+                // Restaurar colores (Blanco)
                 cardResult.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
                 tvTotal.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.black))
                 tvDesglose.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.darker_gray))
 
-                // 2. LA FÓRMULA INTELIGENTE
                 val insuComida = raciones * myRatio
-
-                // Corrección: (Glucosa - Objetivo) / Sensibilidad
-                // NOTA: Permitimos negativos. Si estás en 90 y tu objetivo es 110, restará insulina.
                 val insuCorreccion = (glucosa - myTarget) / mySensibilidad
 
-                // Suma total
-                var total = insuComida + insuCorreccion
+                // Descontar IOB activo para evitar insulin stacking
+                var total = insuComida + insuCorreccion - currentIob
 
-                // SEGURIDAD FINAL: La insulina nunca puede ser negativa
+                // La insulina nunca puede ser negativa
                 if (total < 0) total = 0.0
 
                 // Redondeos (1 decimal)
                 val totalRedondeado = (total * 10.0).roundToInt() / 10.0
                 val comidaRed = (insuComida * 10.0).roundToInt() / 10.0
                 val correccionRed = (insuCorreccion * 10.0).roundToInt() / 10.0
+                val iobRed = (currentIob * 10.0).roundToInt() / 10.0
 
-                // 3. Mostrar
+                // Mostrar total
                 tvTotal.text = "$totalRedondeado U"
 
-                // Explicación dinámica (para que el usuario entienda si le restamos insulina)
-                if (correccionRed < 0) {
-                    tvDesglose.text = "Comida ($comidaRed) - Resta (${kotlin.math.abs(correccionRed)})"
-                } else {
-                    tvDesglose.text = "Comida ($comidaRed) + Corrección ($correccionRed)"
+                // Desglose dinámico
+                val desglose = buildString {
+                    if (correccionRed < 0) {
+                        append("Comida ($comidaRed) - Resta (${kotlin.math.abs(correccionRed)})")
+                    } else {
+                        append("Comida ($comidaRed) + Corrección ($correccionRed)")
+                    }
+                    if (iobRed > 0) {
+                        append(" - IOB ($iobRed)")
+                    }
                 }
+                tvDesglose.text = desglose
 
                 cardResult.visibility = View.VISIBLE
 
                 // --- C) GUARDAR ---
-                saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRedondeado)
+                saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRedondeado, iobRed)
                 showInterstitialAd()
 
             } else {
@@ -147,29 +149,29 @@ class BoloActivity : AppCompatActivity() {
             }
         }
 
-        // 3. Volver atrás
         btnBack.setOnClickListener {
             finish()
         }
     }
 
     private fun loadMedicalSettings() {
-        val userId = auth.currentUser?.uid
-        if (userId == null) return
+        val userId = auth.currentUser?.uid ?: return
 
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val ratio = document.getDouble("factorHC")
                     val sensi = document.getDouble("sensibilidad")
-                    // CARGAMOS EL OBJETIVO (Si no existe, usamos 100 por defecto)
                     val target = document.getDouble("target") ?: 100.0
+                    val dia = document.getDouble("diaHoras") ?: 4.0
 
                     if (ratio != null && sensi != null) {
                         myRatio = ratio
                         mySensibilidad = sensi
-                        myTarget = target // Guardamos el objetivo
-                        dataLoaded = true
+                        myTarget = target
+                        myDia = dia
+                        // Cargar IOB en segundo paso
+                        loadCurrentIob()
                     } else {
                         Toast.makeText(this, "¡Faltan configurar tus Ajustes!", Toast.LENGTH_LONG).show()
                     }
@@ -179,6 +181,34 @@ class BoloActivity : AppCompatActivity() {
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Error de conexión", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun loadCurrentIob() {
+        val userId = auth.currentUser?.uid ?: run {
+            dataLoaded = true
+            return
+        }
+        val diaMs = (myDia * 3_600_000).toLong()
+        val cutoff = System.currentTimeMillis() - diaMs
+
+        db.collection("users").document(userId)
+            .collection("history")
+            .whereGreaterThan("fecha", cutoff)
+            .get()
+            .addOnSuccessListener { documents ->
+                val logs = documents.map { doc ->
+                    BoloLog(
+                        fecha = doc.getLong("fecha") ?: 0L,
+                        dosisTotal = doc.getDouble("dosisTotal") ?: 0.0
+                    )
+                }
+                currentIob = IobCalculator.calcular(logs, (myDia * 60).toInt())
+                dataLoaded = true
+            }
+            .addOnFailureListener {
+                currentIob = 0.0
+                dataLoaded = true
             }
     }
 
@@ -210,9 +240,15 @@ class BoloActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveLogToFirebase(glucosa: Double, raciones: Double, comida: Double, correccion: Double, total: Double) {
+    private fun saveLogToFirebase(
+        glucosa: Double,
+        raciones: Double,
+        comida: Double,
+        correccion: Double,
+        total: Double,
+        iobDescontado: Double = 0.0
+    ) {
         val userId = auth.currentUser?.uid ?: return
-
 
         val nuevoLog = BoloLog(
             glucosa = glucosa,
@@ -220,6 +256,7 @@ class BoloActivity : AppCompatActivity() {
             dosisComida = comida,
             dosisCorreccion = correccion,
             dosisTotal = total,
+            iobDescontado = iobDescontado,
             fecha = System.currentTimeMillis()
         )
 
