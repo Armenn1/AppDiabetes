@@ -36,7 +36,7 @@
             android:textColor="#FFFFFF"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
-            android:background="@drawable/bg_card"
+            android:background="@drawable/bg_badge_rounded"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

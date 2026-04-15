@@ -1,6 +1,7 @@
 package com.example.tfg_diabetesapp
 
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,7 +80,7 @@ class HistoryAdapter(private var lista: List<BoloLog>) :
         // Badge
         h.tvTipoBadge.visibility = View.VISIBLE
         h.tvTipoBadge.text = "Insulina"
-        h.tvTipoBadge.setBackgroundColor(purple)
+        h.tvTipoBadge.background = roundedBadge(purple)
 
         // Sin glucosa
         h.tvGlucosa.visibility = View.GONE
@@ -101,7 +102,7 @@ class HistoryAdapter(private var lista: List<BoloLog>) :
         // Badge
         h.tvTipoBadge.visibility = View.VISIBLE
         h.tvTipoBadge.text = "Comida"
-        h.tvTipoBadge.setBackgroundColor(green)
+        h.tvTipoBadge.background = roundedBadge(green)
 
         // Raciones como valor principal izquierda
         h.tvGlucosa.visibility = View.VISIBLE
@@ -118,6 +119,12 @@ class HistoryAdapter(private var lista: List<BoloLog>) :
     }
 
     override fun getItemCount() = lista.size
+
+    private fun roundedBadge(color: Int): GradientDrawable = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = 40f
+        setColor(color)
+    }
 
     /** Actualiza la lista con DiffUtil para evitar parpadeos */
     fun updateLista(nueva: List<BoloLog>) {

@@ -39,6 +39,7 @@ class SettingsFragment : Fragment() {
     private lateinit var actvInsulina: AutoCompleteTextView
     private lateinit var tilDiaPersonalizado: TextInputLayout
     private lateinit var etDiaPersonalizado: EditText
+    private lateinit var btnSaveSettings: Button
 
     // ── Perfiles horarios ────────────────────────────────────────────────────
     private val perfiles = mutableListOf<PerfilHorario>()
@@ -89,7 +90,8 @@ class SettingsFragment : Fragment() {
             tilDiaPersonalizado.visibility = if (position == 2) View.VISIBLE else View.GONE
         }
 
-        view.findViewById<Button>(R.id.btnSaveSettings).setOnClickListener { onSaveClick() }
+        btnSaveSettings = view.findViewById(R.id.btnSaveSettings)
+        btnSaveSettings.setOnClickListener { onSaveClick() }
         view.findViewById<Button>(R.id.btnAddPerfil).setOnClickListener { showAddPerfilDialog() }
 
         loadExistingData()

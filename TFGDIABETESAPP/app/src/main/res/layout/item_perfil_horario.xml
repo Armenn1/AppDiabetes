@@ -1,61 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
     android:layout_marginBottom="8dp"
-    android:background="@color/color_primary_light"
-    android:paddingHorizontal="12dp"
-    android:paddingVertical="10dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
+    app:cardBackgroundColor="@color/color_primary_light"
+    app:strokeColor="@color/color_primary"
+    app:strokeWidth="1dp">
 
-    <!-- Chip de hora activo -->
-    <TextView
-        android:id="@+id/tvPerfilActivo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="●"
-        android:textSize="10sp"
-        android:textColor="@color/color_primary"
-        android:layout_marginEnd="6dp"
-        android:visibility="gone" />
-
-    <!-- Info del perfil -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="12dp">
 
+        <!-- Dot indicador activo -->
         <TextView
-            android:id="@+id/tvPerfilRango"
+            android:id="@+id/tvPerfilActivo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="08:00 - 14:00"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/color_text_primary" />
+            android:text="●"
+            android:textSize="10sp"
+            android:textColor="@color/color_primary"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/tvPerfilDetalle"
-            android:layout_width="wrap_content"
+        <!-- Info del perfil -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Ratio: 1.2 U/rac · Sens: 40 mg/dL"
-            android:textSize="12sp"
-            android:textColor="@color/color_text_secondary"
-            android:layout_marginTop="2dp" />
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvPerfilRango"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="08:00 - 14:00"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/color_primary" />
+
+            <TextView
+                android:id="@+id/tvPerfilDetalle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ratio: 1.2 U/rac · Sens: 40 mg/dL"
+                android:textSize="12sp"
+                android:textColor="@color/color_text_secondary"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+        <!-- Botón eliminar -->
+        <ImageButton
+            android:id="@+id/btnDeletePerfil"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="@color/color_error"
+            android:contentDescription="Eliminar perfil" />
 
     </LinearLayout>
-
-    <!-- Botón eliminar -->
-    <ImageButton
-        android:id="@+id/btnDeletePerfil"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_delete"
-        app:tint="@color/color_error"
-        android:contentDescription="Eliminar perfil" />
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>
