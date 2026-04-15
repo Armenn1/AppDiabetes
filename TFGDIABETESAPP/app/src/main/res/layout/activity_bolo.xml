@@ -49,6 +49,16 @@
             android:textSize="13sp"
             android:textColor="#BBDEFB"
             android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvPerfilActivo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="● Perfil: 08:00 - 14:00"
+            android:textSize="12sp"
+            android:textColor="#80DEEA"
+            android:layout_marginTop="6dp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <!-- Scrollable content overlapping header -->

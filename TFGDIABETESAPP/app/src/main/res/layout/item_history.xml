@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- Fecha -->
         <TextView
             android:id="@+id/tvFecha"
             android:layout_width="wrap_content"
@@ -24,6 +25,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Badge de tipo (Insulina / Comida) -->
+        <TextView
+            android:id="@+id/tvTipoBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Insulina"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:background="@drawable/bg_card"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Valor principal izquierda (glucosa o raciones) -->
         <TextView
             android:id="@+id/tvGlucosaItem"
             android:layout_width="wrap_content"
@@ -36,7 +54,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvFecha" />
 
+        <!-- Unidad izquierda (mg/dL o rac) -->
         <TextView
+            android:id="@+id/tvUnidadIzq"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" mg/dL"
@@ -46,6 +66,7 @@
             app:layout_constraintStart_toEndOf="@id/tvGlucosaItem"
             app:layout_constraintBaseline_toBaselineOf="@id/tvGlucosaItem" />
 
+        <!-- Dosis derecha -->
         <TextView
             android:id="@+id/tvDosisItem"
             android:layout_width="wrap_content"
@@ -58,6 +79,7 @@
             app:layout_constraintTop_toTopOf="@id/tvGlucosaItem"
             app:layout_constraintBottom_toBottomOf="@id/tvGlucosaItem" />
 
+        <!-- Divider -->
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
@@ -66,9 +88,10 @@
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/tvGlucosaItem" />
 
+        <!-- Detalle (breakdown o nota) -->
         <TextView
             android:id="@+id/tvRacionesItem"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="4 Raciones"
             android:textSize="12sp"

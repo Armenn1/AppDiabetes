@@ -194,6 +194,57 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Perfiles horarios card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/color_surface"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Perfiles Horarios"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/color_text_primary"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ratio e insulina distintos según la hora del día. Si ningún perfil aplica, se usan los valores globales de arriba."
+                        android:textSize="13sp"
+                        android:textColor="@color/color_text_secondary"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Lista dinámica de perfiles -->
+                    <LinearLayout
+                        android:id="@+id/llPerfiles"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddPerfil"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="+ Añadir franja horaria"
+                        android:layout_marginTop="8dp"
+                        app:cornerRadius="10dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- LibreLinkUp section card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

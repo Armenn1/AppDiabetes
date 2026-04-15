@@ -21,32 +21,35 @@ import kotlin.math.roundToInt
 
 class BoloActivity : AppCompatActivity() {
 
-    // Firebase
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
     // AdMob
     private var interstitialAd: InterstitialAd? = null
 
-    // Variables médicas (Se rellenan desde Firebase)
+    // Ajustes médicos globales (fallback cuando no hay perfil activo)
     private var myRatio: Double = 0.0
     private var mySensibilidad: Double = 0.0
     private var myTarget: Double = 100.0
     private var myDia: Double = 4.0
 
+    // Perfiles horarios del usuario
+    private var perfiles: List<PerfilHorario> = emptyList()
+
     // IOB activo al abrir la calculadora
     private var currentIob: Double = 0.0
 
-    private var dataLoaded = false // Semáforo: true cuando settings + IOB están listos
+    private var dataLoaded = false
+
+    // ── Ratio y sensibilidad efectivos (perfil activo o globales) ────────────
+    private val effectiveRatio get() = PerfilHorario.getActivo(perfiles)?.factorHC ?: myRatio
+    private val effectiveSensibilidad get() = PerfilHorario.getActivo(perfiles)?.sensibilidad ?: mySensibilidad
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Si no hay cuenta logeada manda a inicio de session (por el widget)
-        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
         if (auth.currentUser == null) {
-            val intent = android.content.Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            startActivity(android.content.Intent(this, LoginActivity::class.java))
             finish()
             return
         }
@@ -55,22 +58,17 @@ class BoloActivity : AppCompatActivity() {
         MobileAds.initialize(this)
         loadInterstitialAd()
 
-        // Referencias UI
         val etGlucosa = findViewById<EditText>(R.id.etGlucosaActual)
         val etRaciones = findViewById<EditText>(R.id.etRaciones)
-
         val btnCalcular = findViewById<MaterialButton>(R.id.btnCalcular)
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
-
-        // Referencias Resultado
         val cardResult = findViewById<MaterialCardView>(R.id.cardResult)
         val tvTotal = findViewById<TextView>(R.id.tvTotalDosis)
         val tvDesglose = findViewById<TextView>(R.id.tvDesglose)
+        val tvPerfilActivo = findViewById<TextView>(R.id.tvPerfilActivo)
 
-        // 1. CARGAR DATOS (settings → IOB) NADA MÁS ENTRAR
-        loadMedicalSettings()
+        loadMedicalSettings(tvPerfilActivo)
 
-        // 2. LÓGICA DEL BOTÓN CALCULAR
         btnCalcular.setOnClickListener {
             if (!dataLoaded) {
                 Toast.makeText(this, "Cargando tus ajustes médicos...", Toast.LENGTH_SHORT).show()
@@ -80,104 +78,115 @@ class BoloActivity : AppCompatActivity() {
             val sGlucosa = etGlucosa.text.toString()
             val sRaciones = etRaciones.text.toString()
 
-            if (sGlucosa.isNotEmpty() && sRaciones.isNotEmpty()) {
-                val glucosa = sGlucosa.toDouble()
-                val raciones = sRaciones.toDouble()
-
-                // --- A) SEGURIDAD: DETECTAR HIPOGLUCEMIA ---
-                if (glucosa < 70) {
-                    cardResult.visibility = View.VISIBLE
-                    cardResult.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.holo_red_light))
-
-                    tvTotal.text = "HIPO"
-                    tvTotal.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
-
-                    tvDesglose.text = "¡PELIGRO! Glucosa baja.\nIngiere azúcares rápidos y NO te inyectes."
-                    tvDesglose.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
-
-                    saveLogToFirebase(glucosa, raciones, 0.0, 0.0, 0.0)
-
-                    return@setOnClickListener
-                }
-
-                // --- B) CÁLCULO CON IOB ---
-
-                // Restaurar colores (Blanco)
-                cardResult.setCardBackgroundColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.white))
-                tvTotal.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.black))
-                tvDesglose.setTextColor(androidx.core.content.ContextCompat.getColor(this, android.R.color.darker_gray))
-
-                val insuComida = raciones * myRatio
-                val insuCorreccion = (glucosa - myTarget) / mySensibilidad
-
-                // Descontar IOB activo para evitar insulin stacking
-                var total = insuComida + insuCorreccion - currentIob
-
-                // La insulina nunca puede ser negativa
-                if (total < 0) total = 0.0
-
-                // Redondeos (1 decimal)
-                val totalRedondeado = (total * 10.0).roundToInt() / 10.0
-                val comidaRed = (insuComida * 10.0).roundToInt() / 10.0
-                val correccionRed = (insuCorreccion * 10.0).roundToInt() / 10.0
-                val iobRed = (currentIob * 10.0).roundToInt() / 10.0
-
-                // Mostrar total
-                tvTotal.text = "$totalRedondeado U"
-
-                // Desglose dinámico
-                val desglose = buildString {
-                    if (correccionRed < 0) {
-                        append("Comida ($comidaRed) - Resta (${kotlin.math.abs(correccionRed)})")
-                    } else {
-                        append("Comida ($comidaRed) + Corrección ($correccionRed)")
-                    }
-                    if (iobRed > 0) {
-                        append(" - IOB ($iobRed)")
-                    }
-                }
-                tvDesglose.text = desglose
-
-                cardResult.visibility = View.VISIBLE
-
-                // --- C) GUARDAR ---
-                saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRedondeado, iobRed)
-                showInterstitialAd()
-
-            } else {
+            if (sGlucosa.isEmpty() || sRaciones.isEmpty()) {
                 Toast.makeText(this, "Rellena glucosa y raciones", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            val glucosa = sGlucosa.toDouble()
+            val raciones = sRaciones.toDouble()
+
+            // A) Hipoglucemia
+            if (glucosa < 70) {
+                cardResult.visibility = View.VISIBLE
+                cardResult.setCardBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(this, android.R.color.holo_red_light)
+                )
+                tvTotal.text = "HIPO"
+                tvTotal.setTextColor(
+                    androidx.core.content.ContextCompat.getColor(this, android.R.color.white)
+                )
+                tvDesglose.text = "¡PELIGRO! Glucosa baja.\nIngiere azúcares rápidos y NO te inyectes."
+                tvDesglose.setTextColor(
+                    androidx.core.content.ContextCompat.getColor(this, android.R.color.white)
+                )
+                saveLogToFirebase(glucosa, raciones, 0.0, 0.0, 0.0)
+                return@setOnClickListener
+            }
+
+            // B) Cálculo con perfil activo (o fallback global)
+            cardResult.setCardBackgroundColor(
+                androidx.core.content.ContextCompat.getColor(this, android.R.color.white)
+            )
+            tvTotal.setTextColor(
+                androidx.core.content.ContextCompat.getColor(this, android.R.color.black)
+            )
+            tvDesglose.setTextColor(
+                androidx.core.content.ContextCompat.getColor(this, android.R.color.darker_gray)
+            )
+
+            val insuComida = raciones * effectiveRatio
+            val insuCorreccion = (glucosa - myTarget) / effectiveSensibilidad
+            var total = insuComida + insuCorreccion - currentIob
+            if (total < 0) total = 0.0
+
+            val totalRed = (total * 10.0).roundToInt() / 10.0
+            val comidaRed = (insuComida * 10.0).roundToInt() / 10.0
+            val correccionRed = (insuCorreccion * 10.0).roundToInt() / 10.0
+            val iobRed = (currentIob * 10.0).roundToInt() / 10.0
+
+            tvTotal.text = "$totalRed U"
+
+            val desglose = buildString {
+                if (correccionRed < 0) {
+                    append("Comida ($comidaRed) - Resta (${kotlin.math.abs(correccionRed)})")
+                } else {
+                    append("Comida ($comidaRed) + Corrección ($correccionRed)")
+                }
+                if (iobRed > 0) append(" - IOB ($iobRed)")
+            }
+            tvDesglose.text = desglose
+            cardResult.visibility = View.VISIBLE
+
+            saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRed, iobRed)
+            showInterstitialAd()
         }
 
-        btnBack.setOnClickListener {
-            finish()
-        }
+        btnBack.setOnClickListener { finish() }
     }
 
-    private fun loadMedicalSettings() {
+    // ── Carga de ajustes + perfiles ──────────────────────────────────────────
+
+    private fun loadMedicalSettings(tvPerfilActivo: TextView) {
         val userId = auth.currentUser?.uid ?: return
 
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val ratio = document.getDouble("factorHC")
-                    val sensi = document.getDouble("sensibilidad")
-                    val target = document.getDouble("target") ?: 100.0
-                    val dia = document.getDouble("diaHoras") ?: 4.0
-
-                    if (ratio != null && sensi != null) {
-                        myRatio = ratio
-                        mySensibilidad = sensi
-                        myTarget = target
-                        myDia = dia
-                        // Cargar IOB en segundo paso
-                        loadCurrentIob()
-                    } else {
-                        Toast.makeText(this, "¡Faltan configurar tus Ajustes!", Toast.LENGTH_LONG).show()
-                    }
-                } else {
+                if (!document.exists()) {
                     Toast.makeText(this, "Ve a Ajustes para configurar tus ratios", Toast.LENGTH_LONG).show()
+                    return@addOnSuccessListener
                 }
+
+                val ratio = document.getDouble("factorHC")
+                val sensi = document.getDouble("sensibilidad")
+                val target = document.getDouble("target") ?: 100.0
+                val dia = document.getDouble("diaHoras") ?: 4.0
+
+                if (ratio == null || sensi == null) {
+                    Toast.makeText(this, "¡Faltan configurar tus Ajustes!", Toast.LENGTH_LONG).show()
+                    return@addOnSuccessListener
+                }
+
+                myRatio = ratio
+                mySensibilidad = sensi
+                myTarget = target
+                myDia = dia
+
+                // Cargar perfiles horarios
+                @Suppress("UNCHECKED_CAST")
+                val rawPerfiles = document.get("perfilesHorarios") as? List<Map<*, *>> ?: emptyList()
+                perfiles = rawPerfiles.map { PerfilHorario.fromMap(it) }
+
+                // Mostrar indicador de perfil activo
+                val activo = PerfilHorario.getActivo(perfiles)
+                if (activo != null) {
+                    tvPerfilActivo.text = "● Perfil activo: ${activo.rangoTexto()}"
+                    tvPerfilActivo.visibility = View.VISIBLE
+                } else {
+                    tvPerfilActivo.visibility = View.GONE
+                }
+
+                loadCurrentIob()
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Error de conexión", Toast.LENGTH_SHORT).show()
@@ -185,12 +194,8 @@ class BoloActivity : AppCompatActivity() {
     }
 
     private fun loadCurrentIob() {
-        val userId = auth.currentUser?.uid ?: run {
-            dataLoaded = true
-            return
-        }
-        val diaMs = (myDia * 3_600_000).toLong()
-        val cutoff = System.currentTimeMillis() - diaMs
+        val userId = auth.currentUser?.uid ?: run { dataLoaded = true; return }
+        val cutoff = System.currentTimeMillis() - (myDia * 3_600_000).toLong()
 
         db.collection("users").document(userId)
             .collection("history")
@@ -212,18 +217,16 @@ class BoloActivity : AppCompatActivity() {
             }
     }
 
+    // ── AdMob ────────────────────────────────────────────────────────────────
+
     private fun loadInterstitialAd() {
         InterstitialAd.load(
             this,
             "ca-app-pub-3940256099942544/1033173712", // TODO: reemplaza con tu ad unit ID real
             AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    interstitialAd = ad
-                }
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    interstitialAd = null
-                }
+                override fun onAdLoaded(ad: InterstitialAd) { interstitialAd = ad }
+                override fun onAdFailedToLoad(error: LoadAdError) { interstitialAd = null }
             }
         )
     }
@@ -240,6 +243,8 @@ class BoloActivity : AppCompatActivity() {
         }
     }
 
+    // ── Guardar en Firestore ─────────────────────────────────────────────────
+
     private fun saveLogToFirebase(
         glucosa: Double,
         raciones: Double,
@@ -249,7 +254,6 @@ class BoloActivity : AppCompatActivity() {
         iobDescontado: Double = 0.0
     ) {
         val userId = auth.currentUser?.uid ?: return
-
         val nuevoLog = BoloLog(
             glucosa = glucosa,
             raciones = raciones,
@@ -259,9 +263,6 @@ class BoloActivity : AppCompatActivity() {
             iobDescontado = iobDescontado,
             fecha = System.currentTimeMillis()
         )
-
-        db.collection("users").document(userId)
-            .collection("history")
-            .add(nuevoLog)
+        db.collection("users").document(userId).collection("history").add(nuevoLog)
     }
 }
