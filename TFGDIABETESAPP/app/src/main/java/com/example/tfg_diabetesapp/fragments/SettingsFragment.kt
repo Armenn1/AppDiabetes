@@ -23,6 +23,8 @@ class SettingsFragment : Fragment() {
     private lateinit var etFactorHC: EditText
     private lateinit var etSensibilidad: EditText
     private lateinit var etObjetivo: EditText
+    private lateinit var etUmbralBajo: EditText
+    private lateinit var etUmbralAlto: EditText
     private lateinit var etLibreEmail: EditText
     private lateinit var etLibrePassword: EditText
     private lateinit var actvInsulina: AutoCompleteTextView
@@ -58,6 +60,8 @@ class SettingsFragment : Fragment() {
         etFactorHC = view.findViewById(R.id.etFactorHC)
         etSensibilidad = view.findViewById(R.id.etSensibilidad)
         etObjetivo = view.findViewById(R.id.etObjetivo)
+        etUmbralBajo = view.findViewById(R.id.etUmbralBajo)
+        etUmbralAlto = view.findViewById(R.id.etUmbralAlto)
         etLibreEmail = view.findViewById(R.id.etLibreEmail)
         etLibrePassword = view.findViewById(R.id.etLibrePassword)
         actvInsulina = view.findViewById(R.id.actvInsulina)
@@ -83,10 +87,19 @@ class SettingsFragment : Fragment() {
             val librePasswordText = etLibrePassword.text.toString()
             val insulinaText = actvInsulina.text.toString()
 
+            val umbralBajoText = etUmbralBajo.text.toString()
+            val umbralAltoText = etUmbralAlto.text.toString()
+
             if (factorText.isNotEmpty() && sensibilidadText.isNotEmpty() && objetivoText.isNotEmpty()) {
                 // Validar DIA personalizada si está seleccionada
                 if (insulinaText == INSULINA_OPTIONS[2] && etDiaPersonalizado.text.toString().toDoubleOrNull() == null) {
                     Toast.makeText(requireContext(), "Introduce las horas de duración de tu insulina", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                val umbralBajo = umbralBajoText.toDoubleOrNull() ?: 70.0
+                val umbralAlto = umbralAltoText.toDoubleOrNull() ?: 180.0
+                if (umbralBajo >= umbralAlto) {
+                    Toast.makeText(requireContext(), "El umbral bajo debe ser menor que el alto", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
                 val diaHoras = diaDesdeOpcion(insulinaText, etDiaPersonalizado.text.toString())
@@ -96,7 +109,9 @@ class SettingsFragment : Fragment() {
                     objetivoText.toDouble(),
                     libreEmailText,
                     librePasswordText,
-                    diaHoras
+                    diaHoras,
+                    umbralBajo,
+                    umbralAlto
                 )
             } else {
                 Toast.makeText(requireContext(), "Por favor rellena los campos médicos", Toast.LENGTH_SHORT).show()
@@ -112,7 +127,9 @@ class SettingsFragment : Fragment() {
         objetivo: Double,
         libreEmail: String,
         librePassword: String,
-        diaHoras: Double
+        diaHoras: Double,
+        umbralBajo: Double,
+        umbralAlto: Double
     ) {
         val userId = auth.currentUser?.uid ?: run {
             Toast.makeText(requireContext(), "Usuario no identificado", Toast.LENGTH_SHORT).show()
@@ -125,7 +142,9 @@ class SettingsFragment : Fragment() {
             "target" to objetivo,
             "libreEmail" to libreEmail,
             "librePassword" to librePassword,
-            "diaHoras" to diaHoras
+            "diaHoras" to diaHoras,
+            "umbralBajo" to umbralBajo,
+            "umbralAlto" to umbralAlto
         )
 
         db.collection("users").document(userId)
@@ -149,10 +168,14 @@ class SettingsFragment : Fragment() {
                     val libreEmail = document.getString("libreEmail") ?: ""
                     val librePassword = document.getString("librePassword") ?: ""
                     val diaHoras = document.getDouble("diaHoras") ?: 4.0
+                    val umbralBajo = document.getDouble("umbralBajo") ?: 70.0
+                    val umbralAlto = document.getDouble("umbralAlto") ?: 180.0
 
                     if (factor != null) etFactorHC.setText(factor.toString())
                     if (sensi != null) etSensibilidad.setText(sensi.toString())
                     etObjetivo.setText(target.toString())
+                    etUmbralBajo.setText(umbralBajo.toInt().toString())
+                    etUmbralAlto.setText(umbralAlto.toInt().toString())
                     etLibreEmail.setText(libreEmail)
                     etLibrePassword.setText(librePassword)
 
