@@ -1,7 +1,14 @@
 package com.example.tfg_diabetesapp.fragments
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +16,8 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +25,7 @@ import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.BoloLog
 import com.example.tfg_diabetesapp.IobCalculator
 import com.example.tfg_diabetesapp.LoginActivity
+import com.example.tfg_diabetesapp.MainActivity
 import com.example.tfg_diabetesapp.R
 import com.example.tfg_diabetesapp.glucose.GlucoseMeasurement
 import com.example.tfg_diabetesapp.glucose.LibreLinkUpRepository
@@ -41,29 +51,43 @@ import kotlin.math.roundToInt
 
 class HomeFragment : Fragment() {
 
+    // ── Estado de alertas (anti-spam: solo notifica en transiciones) ────────
+    private enum class AlertState { NORMAL, HIPO, HIPER }
+    private var alertState = AlertState.NORMAL
+
+    companion object {
+        private const val CHANNEL_ID = "GLUCOSE_ALERTS"
+        private const val NOTIF_ID_HIPO = 1001
+        private const val NOTIF_ID_HIPER = 1002
+    }
+
+    // ── Firebase ────────────────────────────────────────────────────────────
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
+    // ── Vistas ───────────────────────────────────────────────────────────────
     private lateinit var tvGlucosa: TextView
     private lateinit var tvIOB: TextView
     private lateinit var tvLastUpdated: TextView
     private lateinit var pbGlucoseLoading: ProgressBar
     private lateinit var glucoseChart: LineChart
 
-    // Credenciales LibreLinkUp (se cargan desde Firestore)
+    // ── Ajustes del usuario (se cargan desde Firestore) ─────────────────────
     private var libreEmail = ""
     private var librePassword = ""
-
-    // DIA de la insulina en horas (se carga desde Firestore, default 4h)
     private var diaHoras: Double = 4.0
-
-    // Umbrales configurables (con defaults médicos estándar)
     private var umbralBajo: Float = 70f
     private var umbralAlto: Float = 180f
+    private var alarmasActivas: Boolean = false
 
-    // Último valor de glucosa conocido (para mostrar si la API falla)
     private var lastKnownGlucose: Int? = null
 
+    // ── Permiso de notificaciones (Android 13+) ──────────────────────────────
+    private val notifPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* La próxima vez que la glucosa se actualice se usará si se concedió */ }
+
+    // ────────────────────────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -80,6 +104,8 @@ class HomeFragment : Fragment() {
         tvLastUpdated = view.findViewById(R.id.tvLastUpdated)
         pbGlucoseLoading = view.findViewById(R.id.pbGlucoseLoading)
         glucoseChart = view.findViewById(R.id.glucoseChart)
+
+        createNotificationChannel()
         setupGlucoseChart()
 
         cardNewBolo.setOnClickListener {
@@ -94,7 +120,6 @@ class HomeFragment : Fragment() {
             requireActivity().finish()
         }
 
-        // Cargar credenciales y umbrales, y lanzar fetch inmediato al arrancar
         loadUserSettings(fetchAfterLoad = true)
 
         // Loop número: cada 60 segundos
@@ -118,11 +143,11 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Recargar ajustes por si el usuario los cambió en Ajustes
         loadUserSettings()
-        // Actualizar IOB al volver (ej: después de calcular un bolo)
         refreshIobData()
     }
+
+    // ── Carga de ajustes ─────────────────────────────────────────────────────
 
     private fun loadUserSettings(fetchAfterLoad: Boolean = false) {
         val userId = auth.currentUser?.uid ?: return
@@ -134,6 +159,7 @@ class HomeFragment : Fragment() {
 
                 val newUmbralBajo = (document.getDouble("umbralBajo") ?: 70.0).toFloat()
                 val newUmbralAlto = (document.getDouble("umbralAlto") ?: 180.0).toFloat()
+                val newAlarmas = document.getBoolean("alarmasActivas") ?: false
 
                 val credentialsChanged = newEmail != libreEmail || newPassword != librePassword
                 val thresholdsChanged = newUmbralBajo != umbralBajo || newUmbralAlto != umbralAlto
@@ -142,11 +168,13 @@ class HomeFragment : Fragment() {
                 librePassword = newPassword
                 umbralBajo = newUmbralBajo
                 umbralAlto = newUmbralAlto
+                alarmasActivas = newAlarmas
 
-                // Actualizar líneas del gráfico si los umbrales cambiaron
                 if (thresholdsChanged) updateChartLimitLines()
 
-                // Si se pidió fetch inmediato o las credenciales cambiaron, actualizar glucosa
+                // Pedir permiso de notificaciones si se activaron las alarmas
+                if (alarmasActivas) requestNotificationPermissionIfNeeded()
+
                 if ((fetchAfterLoad || credentialsChanged) && libreEmail.isNotEmpty()) {
                     viewLifecycleOwner.lifecycleScope.launch { fetchGlucoseNumber() }
                     viewLifecycleOwner.lifecycleScope.launch { fetchGlucoseChart() }
@@ -154,7 +182,8 @@ class HomeFragment : Fragment() {
             }
     }
 
-    // Actualiza solo el número de glucosa (cada 60s)
+    // ── Fetch glucosa ────────────────────────────────────────────────────────
+
     private suspend fun fetchGlucoseNumber() {
         if (libreEmail.isEmpty() || librePassword.isEmpty()) {
             withContext(Dispatchers.Main) {
@@ -177,6 +206,7 @@ class HomeFragment : Fragment() {
                 updateGlucoseCard(value.toDouble(), stale = false)
                 val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                 tvLastUpdated.text = "Última act. $hora"
+                checkGlucoseAlert(value)
             } else if (lastKnownGlucose != null) {
                 updateGlucoseCard(lastKnownGlucose!!.toDouble(), stale = true)
                 tvLastUpdated.text = "Sin conexión · último dato"
@@ -187,7 +217,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // Actualiza el gráfico (al entrar + cada 10 min)
     private suspend fun fetchGlucoseChart() {
         if (libreEmail.isEmpty() || librePassword.isEmpty()) return
 
@@ -199,6 +228,8 @@ class HomeFragment : Fragment() {
             if (result != null) updateGlucoseChart(result.graphMeasurements)
         }
     }
+
+    // ── Gráfica ──────────────────────────────────────────────────────────────
 
     private fun setupGlucoseChart() {
         glucoseChart.apply {
@@ -219,7 +250,7 @@ class HomeFragment : Fragment() {
                 textColor = Color.GRAY
                 textSize = 9f
                 labelCount = 6
-                granularity = 60f // mínimo 60 minutos entre etiquetas
+                granularity = 60f
                 valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
                         val ms = (value * 60_000L).toLong()
@@ -240,11 +271,9 @@ class HomeFragment : Fragment() {
             axisRight.isEnabled = false
         }
 
-        // Añadir las líneas de umbral con los valores actuales
         updateChartLimitLines()
     }
 
-    /** Elimina y vuelve a añadir las líneas de umbral en el gráfico con los valores actuales */
     private fun updateChartLimitLines() {
         glucoseChart.axisLeft.removeAllLimitLines()
 
@@ -274,7 +303,6 @@ class HomeFragment : Fragment() {
     private fun updateGlucoseChart(measurements: List<GlucoseMeasurement>) {
         if (measurements.isEmpty()) return
 
-        // Intentar parsear el timestamp. LibreLinkUp devuelve "M/d/yyyy h:mm:ss a" en US locale.
         val parsers = listOf(
             SimpleDateFormat("M/d/yyyy h:mm:ss a", Locale.US),
             SimpleDateFormat("M/d/yyyy H:mm:ss", Locale.US),
@@ -289,21 +317,14 @@ class HomeFragment : Fragment() {
             return null
         }
 
-        // Construir entradas usando minutos desde epoch como X para que el formatter funcione
         val entries = mutableListOf<Entry>()
         measurements.forEachIndexed { index, m ->
             val date = parseTs(m.timestamp)
-            val xVal = if (date != null) {
-                (date.time / 60_000).toFloat()
-            } else {
-                index.toFloat() // fallback sin timestamps
-            }
+            val xVal = if (date != null) (date.time / 60_000).toFloat() else index.toFloat()
             entries.add(Entry(xVal, m.value.toFloat()))
         }
 
-        // Si no se pudieron parsear los timestamps, ocultar etiquetas del eje X
-        val timestampsParsed = parseTs(measurements.first().timestamp) != null
-        glucoseChart.xAxis.setDrawLabels(timestampsParsed)
+        glucoseChart.xAxis.setDrawLabels(parseTs(measurements.first().timestamp) != null)
 
         val lineColor = Color.parseColor("#29B6F6")
 
@@ -323,6 +344,8 @@ class HomeFragment : Fragment() {
         glucoseChart.invalidate()
     }
 
+    // ── IOB ──────────────────────────────────────────────────────────────────
+
     private fun refreshIobData() {
         val userId = auth.currentUser?.uid ?: return
         val diaMs = (diaHoras * 3_600_000).toLong()
@@ -339,15 +362,13 @@ class HomeFragment : Fragment() {
                         dosisTotal = doc.getDouble("dosisTotal") ?: 0.0
                     )
                 }
-                val diaMinutos = (diaHoras * 60).toInt()
-                val iob = IobCalculator.calcular(logs, diaMinutos)
-                val iobRed = (iob * 10.0).roundToInt() / 10.0
-                tvIOB.text = "$iobRed U"
+                val iob = IobCalculator.calcular(logs, (diaHoras * 60).toInt())
+                tvIOB.text = "${(iob * 10.0).roundToInt() / 10.0} U"
             }
-            .addOnFailureListener {
-                tvIOB.text = "0.0 U"
-            }
+            .addOnFailureListener { tvIOB.text = "0.0 U" }
     }
+
+    // ── Color glucosa ────────────────────────────────────────────────────────
 
     private fun updateGlucoseCard(glucosa: Double, stale: Boolean = false) {
         tvGlucosa.text = glucosa.roundToInt().toString()
@@ -360,5 +381,97 @@ class HomeFragment : Fragment() {
         }
 
         tvGlucosa.setTextColor(ContextCompat.getColor(requireContext(), color))
+    }
+
+    // ── Alarmas ──────────────────────────────────────────────────────────────
+
+    /**
+     * Comprueba si la glucosa ha cruzado un umbral y, si las alarmas están activas,
+     * notifica SOLO en la transición (no en cada lectura repetida del mismo estado).
+     */
+    private fun checkGlucoseAlert(glucosa: Int) {
+        if (!alarmasActivas) return
+
+        val newState = when {
+            glucosa < umbralBajo -> AlertState.HIPO
+            glucosa > umbralAlto -> AlertState.HIPER
+            else -> AlertState.NORMAL
+        }
+
+        if (newState != AlertState.NORMAL && newState != alertState) {
+            showGlucoseNotification(glucosa, newState)
+        }
+
+        alertState = newState
+    }
+
+    private fun showGlucoseNotification(glucosa: Int, state: AlertState) {
+        if (!hasNotificationPermission()) return
+
+        val isHipo = state == AlertState.HIPO
+        val notifId = if (isHipo) NOTIF_ID_HIPO else NOTIF_ID_HIPER
+
+        val title = if (isHipo) "Glucosa baja" else "Glucosa alta"
+        val umbral = if (isHipo) umbralBajo.toInt() else umbralAlto.toInt()
+        val mensaje = if (isHipo) {
+            "Tu glucosa es $glucosa mg/dL (umbral: $umbral). Ingiere azúcares rápidos."
+        } else {
+            "Tu glucosa es $glucosa mg/dL (umbral: $umbral). Considera una corrección."
+        }
+
+        val tapIntent = PendingIntent.getActivity(
+            requireContext(),
+            notifId,
+            Intent(requireContext(), MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_jeringuilla)
+            .setContentTitle(title)
+            .setContentText(mensaje)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(mensaje))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL) // sonido + vibración
+            .setContentIntent(tapIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val nm = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.notify(notifId, notification)
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Alertas de glucosa",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notificaciones de hipoglucemia e hiperglucemia"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 400, 200, 400)
+            }
+            val nm = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.createNotificationChannel(channel)
+        }
+    }
+
+    private fun hasNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasNotificationPermission()) {
+            notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }

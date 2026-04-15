@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.tfg_diabetesapp.R
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,6 +26,7 @@ class SettingsFragment : Fragment() {
     private lateinit var etObjetivo: EditText
     private lateinit var etUmbralBajo: EditText
     private lateinit var etUmbralAlto: EditText
+    private lateinit var switchAlarmas: MaterialSwitch
     private lateinit var etLibreEmail: EditText
     private lateinit var etLibrePassword: EditText
     private lateinit var actvInsulina: AutoCompleteTextView
@@ -62,6 +64,7 @@ class SettingsFragment : Fragment() {
         etObjetivo = view.findViewById(R.id.etObjetivo)
         etUmbralBajo = view.findViewById(R.id.etUmbralBajo)
         etUmbralAlto = view.findViewById(R.id.etUmbralAlto)
+        switchAlarmas = view.findViewById(R.id.switchAlarmas)
         etLibreEmail = view.findViewById(R.id.etLibreEmail)
         etLibrePassword = view.findViewById(R.id.etLibrePassword)
         actvInsulina = view.findViewById(R.id.actvInsulina)
@@ -111,7 +114,8 @@ class SettingsFragment : Fragment() {
                     librePasswordText,
                     diaHoras,
                     umbralBajo,
-                    umbralAlto
+                    umbralAlto,
+                    switchAlarmas.isChecked
                 )
             } else {
                 Toast.makeText(requireContext(), "Por favor rellena los campos médicos", Toast.LENGTH_SHORT).show()
@@ -129,7 +133,8 @@ class SettingsFragment : Fragment() {
         librePassword: String,
         diaHoras: Double,
         umbralBajo: Double,
-        umbralAlto: Double
+        umbralAlto: Double,
+        alarmasActivas: Boolean
     ) {
         val userId = auth.currentUser?.uid ?: run {
             Toast.makeText(requireContext(), "Usuario no identificado", Toast.LENGTH_SHORT).show()
@@ -144,7 +149,8 @@ class SettingsFragment : Fragment() {
             "librePassword" to librePassword,
             "diaHoras" to diaHoras,
             "umbralBajo" to umbralBajo,
-            "umbralAlto" to umbralAlto
+            "umbralAlto" to umbralAlto,
+            "alarmasActivas" to alarmasActivas
         )
 
         db.collection("users").document(userId)
@@ -170,12 +176,14 @@ class SettingsFragment : Fragment() {
                     val diaHoras = document.getDouble("diaHoras") ?: 4.0
                     val umbralBajo = document.getDouble("umbralBajo") ?: 70.0
                     val umbralAlto = document.getDouble("umbralAlto") ?: 180.0
+                    val alarmasActivas = document.getBoolean("alarmasActivas") ?: false
 
                     if (factor != null) etFactorHC.setText(factor.toString())
                     if (sensi != null) etSensibilidad.setText(sensi.toString())
                     etObjetivo.setText(target.toString())
                     etUmbralBajo.setText(umbralBajo.toInt().toString())
                     etUmbralAlto.setText(umbralAlto.toInt().toString())
+                    switchAlarmas.isChecked = alarmasActivas
                     etLibreEmail.setText(libreEmail)
                     etLibrePassword.setText(librePassword)
 
