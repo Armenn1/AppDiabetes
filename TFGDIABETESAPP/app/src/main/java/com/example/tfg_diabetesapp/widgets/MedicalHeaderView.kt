@@ -16,14 +16,14 @@ class MedicalHeaderView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
+    private val backButton: ImageButton
     private val titleView: TextView
     private val subtitleView: TextView
     private val subtitleExtraView: TextView
     private val logoutButton: ImageButton
 
     init {
-        orientation = HORIZONTAL
-        gravity = android.view.Gravity.CENTER_VERTICAL
+        orientation = VERTICAL
         setBackgroundColor(ContextCompat.getColor(context, R.color.color_primary))
         val px = resources.getDimensionPixelSize(R.dimen.header_padding_horizontal)
         val pt = resources.getDimensionPixelSize(R.dimen.header_padding_top)
@@ -31,6 +31,7 @@ class MedicalHeaderView @JvmOverloads constructor(
         setPadding(px, pt, px, pb)
 
         LayoutInflater.from(context).inflate(R.layout.view_medical_header, this, true)
+        backButton = findViewById(R.id.headerBack)
         titleView = findViewById(R.id.headerTitle)
         subtitleView = findViewById(R.id.headerSubtitle)
         subtitleExtraView = findViewById(R.id.headerSubtitleExtra)
@@ -40,10 +41,9 @@ class MedicalHeaderView @JvmOverloads constructor(
             try {
                 getString(R.styleable.MedicalHeaderView_headerTitle)?.let { titleView.text = it }
                 getString(R.styleable.MedicalHeaderView_headerSubtitle)?.let { subtitleView.text = it }
-                val showLogout = getBoolean(R.styleable.MedicalHeaderView_headerShowLogout, false)
-                logoutButton.visibility = if (showLogout) View.VISIBLE else View.GONE
-                val showExtra = getBoolean(R.styleable.MedicalHeaderView_headerShowSubtitleExtra, false)
-                subtitleExtraView.visibility = if (showExtra) View.VISIBLE else View.GONE
+                backButton.visibility = if (getBoolean(R.styleable.MedicalHeaderView_headerShowBack, false)) View.VISIBLE else View.GONE
+                logoutButton.visibility = if (getBoolean(R.styleable.MedicalHeaderView_headerShowLogout, false)) View.VISIBLE else View.GONE
+                subtitleExtraView.visibility = if (getBoolean(R.styleable.MedicalHeaderView_headerShowSubtitleExtra, false)) View.VISIBLE else View.GONE
             } finally {
                 recycle()
             }
@@ -66,5 +66,10 @@ class MedicalHeaderView @JvmOverloads constructor(
     fun setOnLogoutClickListener(listener: OnClickListener?) {
         logoutButton.setOnClickListener(listener)
         if (listener != null) logoutButton.visibility = View.VISIBLE
+    }
+
+    fun setOnBackClickListener(listener: OnClickListener?) {
+        backButton.setOnClickListener(listener)
+        if (listener != null) backButton.visibility = View.VISIBLE
     }
 }

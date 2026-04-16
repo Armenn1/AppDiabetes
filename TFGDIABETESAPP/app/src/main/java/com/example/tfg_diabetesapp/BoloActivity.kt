@@ -3,10 +3,10 @@ package com.example.tfg_diabetesapp
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.tfg_diabetesapp.widgets.MedicalHeaderView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
@@ -61,13 +61,14 @@ class BoloActivity : AppCompatActivity() {
         val etGlucosa = findViewById<EditText>(R.id.etGlucosaActual)
         val etRaciones = findViewById<EditText>(R.id.etRaciones)
         val btnCalcular = findViewById<MaterialButton>(R.id.btnCalcular)
-        val btnBack = findViewById<ImageButton>(R.id.btnBack)
+        val boloHeader = findViewById<MedicalHeaderView>(R.id.boloHeader)
         val cardResult = findViewById<MaterialCardView>(R.id.cardResult)
         val tvTotal = findViewById<TextView>(R.id.tvTotalDosis)
         val tvDesglose = findViewById<TextView>(R.id.tvDesglose)
-        val tvPerfilActivo = findViewById<TextView>(R.id.tvPerfilActivo)
 
-        loadMedicalSettings(tvPerfilActivo)
+        boloHeader.setOnBackClickListener { finish() }
+
+        loadMedicalSettings(boloHeader)
 
         btnCalcular.setOnClickListener {
             if (!dataLoaded) {
@@ -142,12 +143,11 @@ class BoloActivity : AppCompatActivity() {
             showInterstitialAd()
         }
 
-        btnBack.setOnClickListener { finish() }
     }
 
     // ── Carga de ajustes + perfiles ──────────────────────────────────────────
 
-    private fun loadMedicalSettings(tvPerfilActivo: TextView) {
+    private fun loadMedicalSettings(header: MedicalHeaderView) {
         val userId = auth.currentUser?.uid ?: return
 
         db.collection("users").document(userId).get()
@@ -172,19 +172,12 @@ class BoloActivity : AppCompatActivity() {
                 myTarget = target
                 myDia = dia
 
-                // Cargar perfiles horarios
                 @Suppress("UNCHECKED_CAST")
                 val rawPerfiles = document.get("perfilesHorarios") as? List<Map<*, *>> ?: emptyList()
                 perfiles = rawPerfiles.map { PerfilHorario.fromMap(it) }
 
-                // Mostrar indicador de perfil activo
                 val activo = PerfilHorario.getActivo(perfiles)
-                if (activo != null) {
-                    tvPerfilActivo.text = "● Perfil activo: ${activo.rangoTexto()}"
-                    tvPerfilActivo.visibility = View.VISIBLE
-                } else {
-                    tvPerfilActivo.visibility = View.GONE
-                }
+                header.setSubtitleExtra(activo?.let { "Perfil activo: ${it.rangoTexto()}" })
 
                 loadCurrentIob()
             }
