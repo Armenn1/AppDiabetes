@@ -8,57 +8,25 @@
     android:background="@color/color_background"
     tools:context=".RegisterActivity">
 
-    <!-- Colored header -->
-    <LinearLayout
-        android:id="@+id/headerRegister"
+    <com.example.tfg_diabetesapp.widgets.MedicalHeaderView
+        android:id="@+id/registerHeader"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/color_primary"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="16dp"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        app:headerTitle="Crea tu cuenta"
+        app:headerSubtitle="Empieza a gestionar tu diabetes"
+        app:headerShowBack="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Volver"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Crea tu cuenta"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Empieza a gestionar tu diabetes"
-            android:textSize="13sp"
-            android:textColor="#BBDEFB"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
-
-    <!-- Floating card -->
     <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.App.Card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="-24dp"
-        app:cardCornerRadius="16dp"
+        android:layout_marginHorizontal="@dimen/space_2xl"
+        android:layout_marginTop="@dimen/header_content_overlap_negative"
         app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/color_surface"
-        app:layout_constraintTop_toBottomOf="@id/headerRegister"
+        app:layout_constraintTop_toBottomOf="@id/registerHeader"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -66,14 +34,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="@dimen/space_2xl">
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEmail"
@@ -88,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Contraseña"
                 app:endIconMode="password_toggle"
-                android:layout_marginBottom="28dp">
+                android:layout_marginBottom="@dimen/space_2xl">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
@@ -100,10 +68,10 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRegister"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/button_height"
                 android:text="Registrarse"
                 android:textSize="16sp"
-                app:cornerRadius="10dp" />
+                app:cornerRadius="@dimen/button_corner_radius" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
