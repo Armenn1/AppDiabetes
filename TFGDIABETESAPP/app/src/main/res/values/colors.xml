@@ -30,6 +30,12 @@
     <color name="color_warning">#FF9800</color>
     <color name="color_error">#EF5350</color>
 
+    <!-- Status containers (soft backgrounds for info banners) -->
+    <color name="color_success_container">#E8F5E9</color>
+    <color name="color_on_success_container">#2E7D32</color>
+    <color name="color_error_container">#FCE4EC</color>
+    <color name="color_on_error_container">#C62828</color>
+
     <!-- UI -->
     <color name="color_divider">#E5E7EB</color>
 

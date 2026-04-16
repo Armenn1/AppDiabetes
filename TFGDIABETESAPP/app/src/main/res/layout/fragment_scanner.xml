@@ -6,56 +6,32 @@
     android:orientation="vertical"
     android:background="@color/color_background">
 
-    <!-- HEADER -->
-    <LinearLayout
+    <com.example.tfg_diabetesapp.widgets.MedicalHeaderView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/color_primary"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="28dp"
-        android:paddingBottom="48dp"
-        android:orientation="vertical">
+        app:headerTitle="Escáner IA"
+        app:headerSubtitle="Analiza tu comida y calcula los hidratos" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Escáner IA"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Analiza tu comida y calcula los hidratos"
-            android:textSize="14sp"
-            android:textColor="#BBDEFB"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
-
-    <!-- SCROLLABLE CONTENT -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="-24dp">
+        android:layout_marginTop="@dimen/header_content_overlap_negative"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="32dp">
+            android:paddingHorizontal="@dimen/screen_padding_horizontal"
+            android:paddingBottom="@dimen/space_3xl">
 
             <!-- Image card -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="260dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="10dp"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -68,7 +44,7 @@
                         android:orientation="vertical"
                         android:gravity="center"
                         android:background="@color/color_primary_light"
-                        android:padding="24dp">
+                        android:padding="@dimen/space_2xl">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -80,19 +56,17 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Tu plato aparecerá aquí"
-                            android:textSize="17sp"
-                            android:textStyle="bold"
+                            android:textAppearance="@style/TextAppearance.App.SectionTitle"
                             android:textColor="@color/color_primary"
-                            android:layout_marginTop="14dp" />
+                            android:layout_marginTop="@dimen/space_md" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Pulsa Capturar para escanear\ntu comida con la cámara"
-                            android:textSize="13sp"
-                            android:textColor="@color/color_text_secondary"
+                            android:textAppearance="@style/TextAppearance.App.Caption"
                             android:gravity="center"
-                            android:layout_marginTop="8dp" />
+                            android:layout_marginTop="@dimen/space_sm" />
                     </LinearLayout>
 
                     <ImageView
@@ -100,6 +74,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
+                        android:contentDescription="Foto del plato"
                         android:visibility="gone" />
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -109,31 +84,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnTakePhoto"
+                    style="@style/Widget.App.Button"
                     android:layout_width="0dp"
-                    android:layout_height="56dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="Capturar foto"
-                    app:cornerRadius="14dp"
-                    android:textStyle="bold"
-                    android:textSize="15sp" />
+                    android:layout_marginEnd="@dimen/space_sm"
+                    android:text="Capturar foto" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAnalyze"
+                    style="@style/Widget.App.Button"
                     android:layout_width="0dp"
-                    android:layout_height="56dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="@dimen/space_sm"
                     android:text="Analizar IA"
-                    app:cornerRadius="14dp"
                     android:enabled="false"
-                    app:backgroundTint="#00897B"
-                    android:textStyle="bold"
-                    android:textSize="15sp" />
+                    app:backgroundTint="@color/color_secondary" />
             </LinearLayout>
 
             <!-- Loading state -->
@@ -145,8 +114,8 @@
                 android:gravity="center"
                 android:visibility="gone"
                 android:background="@color/color_primary_light"
-                android:padding="14dp"
-                android:layout_marginBottom="16dp">
+                android:padding="@dimen/space_md"
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <ProgressBar
                     android:id="@+id/progressBarAI"
@@ -161,16 +130,14 @@
                     android:textColor="@color/color_primary"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:layout_marginStart="12dp" />
+                    android:layout_marginStart="@dimen/space_md" />
             </LinearLayout>
 
             <!-- Result card -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/color_surface">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -181,10 +148,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@color/color_primary_light"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
-                        android:paddingTop="14dp"
-                        android:paddingBottom="14dp"
+                        android:padding="@dimen/space_lg"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -198,10 +162,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Resultado del análisis"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
+                            android:textAppearance="@style/TextAppearance.App.SectionTitle"
                             android:textColor="@color/color_primary"
-                            android:layout_marginStart="10dp" />
+                            android:textSize="15sp"
+                            android:layout_marginStart="@dimen/space_md" />
                     </LinearLayout>
 
                     <TextView
@@ -212,7 +176,7 @@
                         android:textSize="15sp"
                         android:textColor="@color/color_text_primary"
                         android:lineSpacingExtra="6dp"
-                        android:padding="20dp" />
+                        android:padding="@dimen/card_padding" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
