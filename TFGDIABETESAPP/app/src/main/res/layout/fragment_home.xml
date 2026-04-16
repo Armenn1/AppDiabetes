@@ -29,6 +29,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/screen_padding_horizontal"
+            android:paddingTop="@dimen/content_gap_after_header"
             android:paddingBottom="@dimen/space_2xl">
 
             <!-- Glucosa actual -->
@@ -132,7 +133,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="@dimen/space_2xl">
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:layout_marginBottom="@dimen/space_3xl">
 
                 <com.google.android.material.card.MaterialCardView
                     style="@style/Widget.App.Card.Metric"
@@ -145,7 +148,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="@dimen/space_lg">
+                        android:padding="@dimen/space_xl">
 
                         <TextView
                             android:layout_width="wrap_content"

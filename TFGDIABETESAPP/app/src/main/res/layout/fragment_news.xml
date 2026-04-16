@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/screen_padding_horizontal"
+            android:paddingTop="@dimen/content_gap_after_header"
             android:paddingBottom="@dimen/space_3xl">
 
             <!-- Raciones -->

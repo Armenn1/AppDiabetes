@@ -8,6 +8,9 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.example.tfg_diabetesapp.R
 
 class MedicalHeaderView @JvmOverloads constructor(
@@ -22,13 +25,23 @@ class MedicalHeaderView @JvmOverloads constructor(
     private val subtitleExtraView: TextView
     private val logoutButton: ImageButton
 
+    private val basePaddingTop: Int
+    private val basePaddingBottom: Int
+    private val basePaddingHorizontal: Int
+
     init {
         orientation = VERTICAL
         setBackgroundColor(ContextCompat.getColor(context, R.color.color_primary))
-        val px = resources.getDimensionPixelSize(R.dimen.header_padding_horizontal)
-        val pt = resources.getDimensionPixelSize(R.dimen.header_padding_top)
-        val pb = resources.getDimensionPixelSize(R.dimen.header_padding_bottom)
-        setPadding(px, pt, px, pb)
+        basePaddingHorizontal = resources.getDimensionPixelSize(R.dimen.header_padding_horizontal)
+        basePaddingTop = resources.getDimensionPixelSize(R.dimen.header_padding_top)
+        basePaddingBottom = resources.getDimensionPixelSize(R.dimen.header_padding_bottom)
+        setPadding(basePaddingHorizontal, basePaddingTop, basePaddingHorizontal, basePaddingBottom)
+
+        ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+            val statusBarTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            v.updatePadding(top = basePaddingTop + statusBarTop)
+            insets
+        }
 
         LayoutInflater.from(context).inflate(R.layout.view_medical_header, this, true)
         backButton = findViewById(R.id.headerBack)

@@ -21,11 +21,12 @@
 
     <!-- Medical header -->
     <dimen name="header_padding_horizontal">24dp</dimen>
-    <dimen name="header_padding_top">24dp</dimen>
-    <dimen name="header_padding_bottom">40dp</dimen>
-    <dimen name="header_content_overlap">24dp</dimen>
-    <dimen name="header_content_overlap_negative">-24dp</dimen>
-    <dimen name="chip_bar_overlap_negative">-16dp</dimen>
+    <dimen name="header_padding_top">16dp</dimen>
+    <dimen name="header_padding_bottom">20dp</dimen>
+    <dimen name="header_content_overlap">0dp</dimen>
+    <dimen name="header_content_overlap_negative">0dp</dimen>
+    <dimen name="chip_bar_overlap_negative">0dp</dimen>
+    <dimen name="content_gap_after_header">16dp</dimen>
 
     <!-- Buttons -->
     <dimen name="button_height">52dp</dimen>
