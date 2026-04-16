@@ -9,6 +9,7 @@
     <color name="color_primary_dark">#1565C0</color>
     <color name="color_primary_light">#DBEAFE</color>
     <color name="color_on_primary">#FFFFFF</color>
+    <color name="color_on_primary_muted">#BBDEFB</color>
 
     <!-- Secondary – informational cyan -->
     <color name="color_secondary">#0288D1</color>

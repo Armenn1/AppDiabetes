@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,6 +29,7 @@ import com.example.tfg_diabetesapp.PerfilHorario
 import com.example.tfg_diabetesapp.R
 import com.example.tfg_diabetesapp.glucose.GlucoseMeasurement
 import com.example.tfg_diabetesapp.glucose.LibreLinkUpRepository
+import com.example.tfg_diabetesapp.widgets.MedicalHeaderView
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
@@ -68,8 +68,7 @@ class HomeFragment : Fragment() {
     private lateinit var tvGlucosa: TextView
     private lateinit var tvIOB: TextView
     private lateinit var tvLastUpdated: TextView
-    private lateinit var tvGreeting: TextView
-    private lateinit var tvPerfilActivoHome: TextView
+    private lateinit var homeHeader: MedicalHeaderView
     private lateinit var pbGlucoseLoading: ProgressBar
     private lateinit var glucoseChart: LineChart
 
@@ -96,13 +95,11 @@ class HomeFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        val btnLogout = view.findViewById<ImageButton>(R.id.btnLogout)
+        homeHeader = view.findViewById(R.id.homeHeader)
         val cardNewBolo = view.findViewById<MaterialCardView>(R.id.cardNewBolo)
         tvGlucosa = view.findViewById(R.id.tvGlucosaMain)
         tvIOB = view.findViewById(R.id.tvIOB)
         tvLastUpdated = view.findViewById(R.id.tvLastUpdated)
-        tvGreeting = view.findViewById(R.id.tvGreeting)
-        tvPerfilActivoHome = view.findViewById(R.id.tvPerfilActivoHome)
         pbGlucoseLoading = view.findViewById(R.id.pbGlucoseLoading)
         glucoseChart = view.findViewById(R.id.glucoseChart)
 
@@ -114,7 +111,7 @@ class HomeFragment : Fragment() {
             startActivity(Intent(requireContext(), BoloActivity::class.java))
         }
 
-        btnLogout?.setOnClickListener {
+        homeHeader.setOnLogoutClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Cerrar sesión")
                 .setMessage("¿Seguro que quieres cerrar sesión?")
@@ -161,7 +158,7 @@ class HomeFragment : Fragment() {
         val nombre = user.displayName?.takeIf { it.isNotBlank() }
             ?: user.email?.substringBefore('@')?.replaceFirstChar { it.uppercase() }
             ?: ""
-        tvGreeting.text = if (nombre.isNotBlank()) "Hola, $nombre" else "Hola"
+        homeHeader.setTitle(if (nombre.isNotBlank()) "Hola, $nombre" else "Hola")
     }
 
     // ── Carga de ajustes ─────────────────────────────────────────────────────
@@ -194,14 +191,8 @@ class HomeFragment : Fragment() {
                 if (thresholdsChanged) updateChartLimitLines()
                 if (alarmasActivas) requestNotificationPermissionIfNeeded()
 
-                // Indicador perfil activo
                 val activo = PerfilHorario.getActivo(perfiles)
-                if (activo != null) {
-                    tvPerfilActivoHome.text = "● Perfil: ${activo.rangoTexto()}"
-                    tvPerfilActivoHome.visibility = View.VISIBLE
-                } else {
-                    tvPerfilActivoHome.visibility = View.GONE
-                }
+                homeHeader.setSubtitleExtra(activo?.let { "Perfil: ${it.rangoTexto()}" })
 
                 if ((fetchAfterLoad || credentialsChanged) && libreEmail.isNotEmpty()) {
                     viewLifecycleOwner.lifecycleScope.launch { fetchGlucoseNumber() }

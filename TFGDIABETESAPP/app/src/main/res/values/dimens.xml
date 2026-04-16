@@ -1,10 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--
-Refer to App Widget Documentation for margin information
-http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
-    -->
+    <!-- Spacing scale -->
+    <dimen name="space_xs">4dp</dimen>
+    <dimen name="space_sm">8dp</dimen>
+    <dimen name="space_md">12dp</dimen>
+    <dimen name="space_lg">16dp</dimen>
+    <dimen name="space_xl">20dp</dimen>
+    <dimen name="space_2xl">24dp</dimen>
+    <dimen name="space_3xl">32dp</dimen>
+
+    <!-- Screen padding -->
+    <dimen name="screen_padding_horizontal">20dp</dimen>
+
+    <!-- Card -->
+    <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_elevation_sm">2dp</dimen>
+    <dimen name="card_padding">20dp</dimen>
+
+    <!-- Medical header -->
+    <dimen name="header_padding_horizontal">24dp</dimen>
+    <dimen name="header_padding_top">24dp</dimen>
+    <dimen name="header_padding_bottom">40dp</dimen>
+    <dimen name="header_content_overlap">24dp</dimen>
+    <dimen name="header_content_overlap_negative">-24dp</dimen>
+    <dimen name="chip_bar_overlap_negative">-16dp</dimen>
+
+    <!-- Buttons -->
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="button_corner_radius">10dp</dimen>
+
+    <!-- Widget -->
     <dimen name="widget_margin">0dp</dimen>
 
 </resources>

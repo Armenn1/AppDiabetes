@@ -4,4 +4,11 @@
         <attr name="appWidgetInnerRadius" format="dimension" />
         <attr name="appWidgetRadius" format="dimension" />
     </declare-styleable>
+
+    <declare-styleable name="MedicalHeaderView">
+        <attr name="headerTitle" format="string" />
+        <attr name="headerSubtitle" format="string" />
+        <attr name="headerShowLogout" format="boolean" />
+        <attr name="headerShowSubtitleExtra" format="boolean" />
+    </declare-styleable>
 </resources>

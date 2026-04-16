@@ -8,42 +8,21 @@
     android:background="@color/color_background"
     tools:context=".fragments.HistoryFragment">
 
-    <!-- Colored header -->
-    <LinearLayout
+    <com.example.tfg_diabetesapp.widgets.MedicalHeaderView
         android:id="@+id/headerHist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/color_primary"
-        android:paddingHorizontal="24dp"
-        android:paddingTop="24dp"
-        android:paddingBottom="32dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Historial"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Bolos, insulina y comidas"
-            android:textSize="13sp"
-            android:textColor="#BBDEFB"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
+        app:headerTitle="Historial"
+        app:headerSubtitle="Bolos, insulina y comidas" />
 
     <!-- Chips de filtro -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp"
-        android:layout_marginTop="-16dp">
+        android:paddingHorizontal="@dimen/space_lg"
+        android:paddingVertical="@dimen/space_md"
+        android:layout_marginTop="@dimen/chip_bar_overlap_negative">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroupFiltro"
@@ -84,7 +63,6 @@
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <!-- RecyclerView + empty state + FAB en FrameLayout -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -103,10 +81,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="No hay registros todavía"
-            android:textColor="@color/color_text_secondary"
+            android:textAppearance="@style/TextAppearance.App.Body"
             android:textSize="15sp"
             android:gravity="center"
-            android:padding="32dp"
+            android:padding="@dimen/space_3xl"
             android:visibility="gone" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -114,9 +92,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="20dp"
-            android:src="@android:drawable/ic_input_add"
-            app:tint="#FFFFFF"
+            android:layout_margin="@dimen/space_xl"
+            android:src="@drawable/ic_add"
+            app:tint="@color/color_on_primary"
             android:contentDescription="Añadir registro" />
 
     </FrameLayout>
