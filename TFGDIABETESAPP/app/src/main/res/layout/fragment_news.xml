@@ -6,57 +6,33 @@
     android:orientation="vertical"
     android:background="@color/color_background">
 
-    <!-- HEADER -->
-    <LinearLayout
+    <com.example.tfg_diabetesapp.widgets.MedicalHeaderView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/color_primary"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="28dp"
-        android:paddingBottom="48dp"
-        android:orientation="vertical">
+        app:headerTitle="Aprende"
+        app:headerSubtitle="Guía rápida sobre diabetes tipo 1" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Aprende"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Guía rápida sobre diabetes tipo 1"
-            android:textSize="14sp"
-            android:textColor="#BBDEFB"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
-
-    <!-- CONTENT -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="-24dp">
+        android:layout_marginTop="@dimen/header_content_overlap_negative"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="32dp">
+            android:paddingHorizontal="@dimen/screen_padding_horizontal"
+            android:paddingTop="@dimen/content_gap_after_header"
+            android:paddingBottom="@dimen/space_3xl">
 
-            <!-- Card: Raciones -->
+            <!-- Raciones -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/color_surface"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -67,7 +43,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@color/color_primary_light"
-                        android:padding="16dp"
+                        android:padding="@dimen/space_lg"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -81,17 +57,17 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="¿Qué es una Ración?"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
+                            android:textAppearance="@style/TextAppearance.App.SectionTitle"
                             android:textColor="@color/color_primary"
-                            android:layout_marginStart="10dp" />
+                            android:textSize="16sp"
+                            android:layout_marginStart="@dimen/space_md" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_padding">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -108,7 +84,7 @@
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="@color/color_primary"
-                            android:layout_marginTop="12dp" />
+                            android:layout_marginTop="@dimen/space_md" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -117,19 +93,17 @@
                             android:textSize="14sp"
                             android:textColor="@color/color_text_secondary"
                             android:lineSpacingExtra="4dp"
-                            android:layout_marginTop="6dp" />
+                            android:layout_marginTop="@dimen/space_xs" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card: Regla de los 15 -->
+            <!-- Regla de los 15 -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/color_surface"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -139,8 +113,8 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#FCE4EC"
-                        android:padding="16dp"
+                        android:background="@color/color_error_container"
+                        android:padding="@dimen/space_lg"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -156,15 +130,15 @@
                             android:text="La Regla de los 15"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#C62828"
-                            android:layout_marginStart="10dp" />
+                            android:textColor="@color/color_on_error_container"
+                            android:layout_marginStart="@dimen/space_md" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_padding">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -181,19 +155,17 @@
                             android:textSize="14sp"
                             android:textColor="@color/color_text_secondary"
                             android:lineSpacingExtra="4dp"
-                            android:layout_marginTop="10dp" />
+                            android:layout_marginTop="@dimen/space_md" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card: Rangos de glucosa -->
+            <!-- Rangos de glucosa -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/color_surface"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -203,8 +175,8 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#E8F5E9"
-                        android:padding="16dp"
+                        android:background="@color/color_success_container"
+                        android:padding="@dimen/space_lg"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -220,22 +192,22 @@
                             android:text="Rangos de Glucosa"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#2E7D32"
-                            android:layout_marginStart="10dp" />
+                            android:textColor="@color/color_on_success_container"
+                            android:layout_marginStart="@dimen/space_md" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_padding">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:layout_marginBottom="10dp">
+                            android:layout_marginBottom="@dimen/space_md">
 
                             <View
                                 android:layout_width="12dp"
@@ -266,7 +238,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:layout_marginBottom="10dp">
+                            android:layout_marginBottom="@dimen/space_md">
 
                             <View
                                 android:layout_width="12dp"
@@ -325,13 +297,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card: IOB -->
+            <!-- IOB -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/color_surface">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -342,7 +312,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@color/color_primary_light"
-                        android:padding="16dp"
+                        android:padding="@dimen/space_lg"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -359,14 +329,14 @@
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="@color/color_primary"
-                            android:layout_marginStart="10dp" />
+                            android:layout_marginStart="@dimen/space_md" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_padding">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -383,7 +353,7 @@
                             android:textSize="14sp"
                             android:textColor="@color/color_text_secondary"
                             android:lineSpacingExtra="4dp"
-                            android:layout_marginTop="10dp" />
+                            android:layout_marginTop="@dimen/space_md" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

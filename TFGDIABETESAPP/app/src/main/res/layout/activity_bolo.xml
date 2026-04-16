@@ -9,83 +9,48 @@
     android:background="@color/color_background"
     tools:context=".BoloActivity">
 
-    <!-- Colored header -->
-    <LinearLayout
+    <com.example.tfg_diabetesapp.widgets.MedicalHeaderView
+        android:id="@+id/boloHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/color_primary"
-        android:paddingStart="16dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="48dp"
-        android:orientation="vertical">
+        app:headerTitle="Calculadora"
+        app:headerSubtitle="Calcula tu dosis de insulina"
+        app:headerShowBack="true" />
 
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="4dp"
-            android:elevation="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Volver"
-            android:src="@android:drawable/ic_menu_revert"
-            android:clickable="true"
-            android:focusable="true"
-            app:tint="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Calculadora"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Calcula tu dosis de insulina"
-            android:textSize="13sp"
-            android:textColor="#BBDEFB"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
-
-    <!-- Scrollable content overlapping header -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="-24dp">
+        android:layout_marginTop="@dimen/header_content_overlap_negative"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingBottom="32dp">
+            android:paddingHorizontal="@dimen/screen_padding_horizontal"
+            android:paddingTop="@dimen/content_gap_after_header"
+            android:paddingBottom="@dimen/space_3xl">
 
             <!-- Input card -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/color_surface"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/space_lg">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/card_padding">
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Glucosa actual (mg/dL)"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginBottom="@dimen/space_lg">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etGlucosaActual"
@@ -99,7 +64,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Raciones de hidratos (10 g)"
-                        android:layout_marginBottom="20dp">
+                        android:layout_marginBottom="@dimen/space_xl">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etRaciones"
@@ -111,10 +76,10 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCalcular"
                         android:layout_width="match_parent"
-                        android:layout_height="52dp"
+                        android:layout_height="@dimen/button_height"
                         android:text="Calcular Dosis"
                         android:textSize="16sp"
-                        app:cornerRadius="10dp" />
+                        app:cornerRadius="@dimen/button_corner_radius" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -122,25 +87,23 @@
             <!-- Result card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardResult"
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/color_surface"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp"
+                    android:padding="@dimen/space_2xl"
                     android:gravity="center">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Dosis Recomendada"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/TextAppearance.App.Body"
                         android:textSize="14sp" />
 
                     <TextView
@@ -148,10 +111,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0.0 U"
-                        android:textColor="@color/color_primary"
-                        android:textStyle="bold"
+                        android:textAppearance="@style/TextAppearance.App.GlucoseValue"
                         android:textSize="52sp"
-                        android:layout_marginTop="8dp" />
+                        android:textColor="@color/color_primary"
+                        android:layout_marginTop="@dimen/space_sm" />
 
                     <TextView
                         android:id="@+id/tvDesglose"
@@ -160,7 +123,7 @@
                         android:text="(Comida: 0.0 + Corrección: 0.0)"
                         android:textColor="@color/color_text_hint"
                         android:textSize="13sp"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="@dimen/space_sm" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

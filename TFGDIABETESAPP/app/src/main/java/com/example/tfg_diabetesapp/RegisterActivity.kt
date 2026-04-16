@@ -1,16 +1,14 @@
 package com.example.tfg_diabetesapp
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.google.firebase.auth.FirebaseAuth
 import android.widget.Button
 import android.widget.EditText
-import android.content.Intent
-import android.widget.ImageButton
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import com.example.tfg_diabetesapp.widgets.MedicalHeaderView
+import com.google.firebase.auth.FirebaseAuth
 
 
 class RegisterActivity : AppCompatActivity() {
@@ -27,6 +25,7 @@ class RegisterActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnRegister = findViewById<Button>(R.id.btnRegister)
+        val header = findViewById<MedicalHeaderView>(R.id.registerHeader)
 
         btnRegister.setOnClickListener {
             val email = etEmail.text.toString()
@@ -42,8 +41,7 @@ class RegisterActivity : AppCompatActivity() {
                 }
         }
 
-        val btnBack = findViewById<ImageButton>(R.id.btnBack)
-        btnBack.setOnClickListener {
+        header.setOnBackClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
     }

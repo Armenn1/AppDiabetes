@@ -1,5 +1,79 @@
 <resources>
 
+    <!-- ========== Text appearances ========== -->
+
+    <!-- Título grande sobre header azul (26sp bold, blanco) -->
+    <style name="TextAppearance.App.HeaderTitle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">26sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/color_on_primary</item>
+    </style>
+
+    <!-- Subtítulo sobre header azul (13sp, azul claro atenuado) -->
+    <style name="TextAppearance.App.HeaderSubtitle" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/color_on_primary_muted</item>
+    </style>
+
+    <!-- Título de sección dentro de cards (17sp bold) -->
+    <style name="TextAppearance.App.SectionTitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- Texto descriptivo / cuerpo secundario (13sp) -->
+    <style name="TextAppearance.App.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
+    <!-- Labels pequeños (12sp) -->
+    <style name="TextAppearance.App.Caption" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
+    <!-- Valor numérico destacado tipo IOB / Basal (22sp bold) -->
+    <style name="TextAppearance.App.MetricValue" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- Valor glucosa XXL (60sp bold) -->
+    <style name="TextAppearance.App.GlucoseValue" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="android:textSize">60sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- ========== Widget styles ========== -->
+
+    <!-- Card estándar de la app -->
+    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardBackgroundColor">@color/color_surface</item>
+    </style>
+
+    <!-- Card con borde fino para métricas agrupadas (sin sombra) -->
+    <style name="Widget.App.Card.Metric" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardBackgroundColor">@color/color_surface</item>
+        <item name="strokeColor">@color/color_divider</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!-- Botón principal redondeado -->
+    <style name="Widget.App.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/button_corner_radius</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+    </style>
+
+    <!-- ========== Legacy widget containers ========== -->
+
     <style name="Widget.TFGDIABETESAPP.AppWidget.Container" parent="android:Widget">
         <item name="android:id">@android:id/background</item>
         <item name="android:background">?android:attr/colorBackground</item>
