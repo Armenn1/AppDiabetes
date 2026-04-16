@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="@dimen/space_sm"
     app:cardCornerRadius="12dp"
     app:cardElevation="1dp"
     app:cardBackgroundColor="@color/color_primary_light"
@@ -15,10 +15,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="14dp"
-        android:paddingVertical="12dp">
+        android:paddingHorizontal="@dimen/space_md"
+        android:paddingVertical="@dimen/space_md">
 
-        <!-- Dot indicador activo -->
         <TextView
             android:id="@+id/tvPerfilActivo"
             android:layout_width="wrap_content"
@@ -26,10 +25,9 @@
             android:text="●"
             android:textSize="10sp"
             android:textColor="@color/color_primary"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="@dimen/space_sm"
             android:visibility="gone" />
 
-        <!-- Info del perfil -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -50,13 +48,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Ratio: 1.2 U/rac · Sens: 40 mg/dL"
-                android:textSize="12sp"
-                android:textColor="@color/color_text_secondary"
+                android:textAppearance="@style/TextAppearance.App.Caption"
                 android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
-        <!-- Botón eliminar -->
         <ImageButton
             android:id="@+id/btnDeletePerfil"
             android:layout_width="36dp"
