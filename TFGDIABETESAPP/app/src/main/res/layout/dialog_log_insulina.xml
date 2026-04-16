@@ -4,16 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingHorizontal="24dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="16dp">
+    android:paddingHorizontal="@dimen/space_2xl"
+    android:paddingTop="@dimen/space_sm"
+    android:paddingBottom="@dimen/space_lg">
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Unidades inyectadas (U)"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="@dimen/space_lg">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etInsulina"
