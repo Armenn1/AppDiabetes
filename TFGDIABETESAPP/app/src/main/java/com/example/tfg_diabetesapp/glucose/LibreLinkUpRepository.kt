@@ -33,7 +33,7 @@ object LibreLinkUpRepository {
             .create(LibreLinkUpApi::class.java)
     }
 
-    suspend fun getLatestGlucose(email: String, pass: String): Int? {
+    suspend fun getLatestGlucose(email: String, pass: String): GlucoseMeasurement? {
         try {
             Log.d("LibreAPI", "Iniciando asalto: Conectando con Abbott...")
 
@@ -81,10 +81,10 @@ object LibreLinkUpRepository {
                 return null
             }
 
-            val finalGlucose = glucoseRes.body()!!.data!!.connection!!.glucoseMeasurement!!.value
-            Log.d("LibreAPI", "¡K.O! Glucosa actual obtenida: $finalGlucose mg/dL")
+            val measurement = glucoseRes.body()!!.data!!.connection!!.glucoseMeasurement!!
+            Log.d("LibreAPI", "¡K.O! Glucosa actual obtenida: ${measurement.value} mg/dL (tendencia: ${measurement.trendArrow})")
 
-            return finalGlucose
+            return measurement
 
         } catch (e: Exception) {
             Log.e("LibreAPI", "Fallo catastrófico: ${e.message}")
