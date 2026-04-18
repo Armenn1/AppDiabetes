@@ -52,7 +52,7 @@ class SettingsFragment : Fragment() {
     private lateinit var actvSexo: AutoCompleteTextView
     private lateinit var etFechaNacimiento: EditText
     private lateinit var actvTipoDiabetes: AutoCompleteTextView
-    private lateinit var etInsulinaBasal: EditText
+    private lateinit var actvInsulinaBasal: AutoCompleteTextView
     private lateinit var etDosisBasal: EditText
     private var fechaNacimientoTimestamp: Long? = null
 
@@ -65,18 +65,33 @@ class SettingsFragment : Fragment() {
         val TIPO_DIABETES_OPTIONS = listOf("Tipo 1", "Tipo 2", "LADA")
         val INSULINA_OPTIONS = listOf(
             "Novorapid / Humalog (4 h)",
+            "Apidra (4 h)",
             "Fiasp / Lyumjev (5 h)",
             "Personalizada"
         )
+        val INSULINA_BASAL_OPTIONS = listOf(
+            "Lantus (Glargina)",
+            "Toujeo (Glargina U-300)",
+            "Basaglar (Glargina biosimilar)",
+            "Tresiba (Degludec)",
+            "Levemir (Detemir)",
+            "NPH / Insulatard",
+            "Otra"
+        )
         fun diaDesdeOpcion(opcion: String, valorPersonalizado: String): Double = when (opcion) {
             INSULINA_OPTIONS[0] -> 4.0
-            INSULINA_OPTIONS[1] -> 5.0
+            INSULINA_OPTIONS[1] -> 4.0
+            INSULINA_OPTIONS[2] -> 5.0
             else -> valorPersonalizado.toDoubleOrNull() ?: 4.0
         }
-        fun indiceDesdeDia(diaHoras: Double): Int = when (diaHoras) {
-            4.0 -> 0
-            5.0 -> 1
-            else -> 2
+        fun indiceDesdeDia(diaHoras: Double, nombre: String): Int {
+            val idx = INSULINA_OPTIONS.indexOfFirst { it == nombre }
+            if (idx >= 0) return idx
+            return when (diaHoras) {
+                4.0 -> 0
+                5.0 -> 2
+                else -> INSULINA_OPTIONS.lastIndex
+            }
         }
     }
 
@@ -107,12 +122,13 @@ class SettingsFragment : Fragment() {
         actvSexo = view.findViewById(R.id.actvSexo)
         etFechaNacimiento = view.findViewById(R.id.etFechaNacimiento)
         actvTipoDiabetes = view.findViewById(R.id.actvTipoDiabetes)
-        etInsulinaBasal = view.findViewById(R.id.etInsulinaBasal)
+        actvInsulinaBasal = view.findViewById(R.id.actvInsulinaBasal)
         etDosisBasal = view.findViewById(R.id.etDosisBasal)
 
         // Dropdowns perfil personal
         actvSexo.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, SEXO_OPTIONS))
         actvTipoDiabetes.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, TIPO_DIABETES_OPTIONS))
+        actvInsulinaBasal.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, INSULINA_BASAL_OPTIONS))
 
         // Date picker para fecha de nacimiento
         etFechaNacimiento.setOnClickListener { showDatePicker() }
@@ -121,7 +137,7 @@ class SettingsFragment : Fragment() {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, INSULINA_OPTIONS)
         actvInsulina.setAdapter(adapter)
         actvInsulina.setOnItemClickListener { _, _, position, _ ->
-            tilDiaPersonalizado.visibility = if (position == 2) View.VISIBLE else View.GONE
+            tilDiaPersonalizado.visibility = if (position == INSULINA_OPTIONS.lastIndex) View.VISIBLE else View.GONE
         }
 
         btnSaveSettings = view.findViewById(R.id.btnSaveSettings)
@@ -149,7 +165,7 @@ class SettingsFragment : Fragment() {
             Toast.makeText(requireContext(), "Por favor rellena los campos médicos", Toast.LENGTH_SHORT).show()
             return
         }
-        if (insulinaText == INSULINA_OPTIONS[2] && etDiaPersonalizado.text.toString().toDoubleOrNull() == null) {
+        if (insulinaText == INSULINA_OPTIONS.last() && etDiaPersonalizado.text.toString().toDoubleOrNull() == null) {
             Toast.makeText(requireContext(), "Introduce las horas de duración de tu insulina", Toast.LENGTH_SHORT).show()
             return
         }
@@ -179,6 +195,7 @@ class SettingsFragment : Fragment() {
             "libreEmail" to libreEmailText,
             "librePassword" to librePasswordText,
             "diaHoras" to diaDesdeOpcion(insulinaText, etDiaPersonalizado.text.toString()),
+            "insulinaRapidaNombre" to insulinaText,
             "umbralBajo" to umbralBajo,
             "umbralAlto" to umbralAlto,
             "alarmasActivas" to switchAlarmas.isChecked
@@ -190,7 +207,7 @@ class SettingsFragment : Fragment() {
         actvSexo.text.toString().takeIf { it.isNotEmpty() }?.let { data["sexo"] = it }
         fechaNacimientoTimestamp?.let { data["fechaNacimiento"] = it }
         actvTipoDiabetes.text.toString().takeIf { it.isNotEmpty() }?.let { data["tipoDiabetes"] = it }
-        etInsulinaBasal.text.toString().takeIf { it.isNotEmpty() }?.let { data["insulinaBasal"] = it }
+        actvInsulinaBasal.text.toString().takeIf { it.isNotEmpty() }?.let { data["insulinaBasal"] = it }
         etDosisBasal.text.toString().toDoubleOrNull()?.let { data["dosisBasal"] = it }
 
         db.collection("users").document(userId)
@@ -244,12 +261,14 @@ class SettingsFragment : Fragment() {
                     etFechaNacimiento.setText(fmt.format(ts))
                 }
                 document.getString("tipoDiabetes")?.takeIf { it.isNotEmpty() }?.let { actvTipoDiabetes.setText(it, false) }
-                document.getString("insulinaBasal")?.takeIf { it.isNotEmpty() }?.let { etInsulinaBasal.setText(it) }
+                val insulinaBasalStr = document.getString("insulinaBasal") ?: ""
+                if (insulinaBasalStr.isNotEmpty()) actvInsulinaBasal.setText(insulinaBasalStr, false)
                 document.getDouble("dosisBasal")?.let { etDosisBasal.setText(it.toString()) }
 
-                val indice = indiceDesdeDia(diaHoras)
+                val nombreInsulina = document.getString("insulinaRapidaNombre") ?: ""
+                val indice = indiceDesdeDia(diaHoras, nombreInsulina)
                 actvInsulina.setText(INSULINA_OPTIONS[indice], false)
-                if (indice == 2) {
+                if (indice == INSULINA_OPTIONS.lastIndex) {
                     tilDiaPersonalizado.visibility = View.VISIBLE
                     etDiaPersonalizado.setText(diaHoras.toString())
                 }

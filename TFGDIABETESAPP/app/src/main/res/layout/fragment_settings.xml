@@ -191,18 +191,18 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Insulina basal (nombre)"
+                        android:hint="Insulina basal (tipo)"
                         android:layout_marginTop="@dimen/space_lg"
                         android:layout_marginBottom="@dimen/space_lg">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etInsulinaBasal"
+                        <AutoCompleteTextView
+                            android:id="@+id/actvInsulinaBasal"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textCapSentences" />
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
