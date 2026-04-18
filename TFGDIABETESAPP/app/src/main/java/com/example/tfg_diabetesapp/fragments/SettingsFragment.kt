@@ -263,6 +263,26 @@ class SettingsFragment : Fragment() {
             }
     }
 
+    // ── Date picker fecha nacimiento ─────────────────────────────────────────
+
+    private fun showDatePicker() {
+        val cal = Calendar.getInstance()
+        fechaNacimientoTimestamp?.let { cal.timeInMillis = it }
+        DatePickerDialog(
+            requireContext(),
+            { _, year, month, day ->
+                cal.set(year, month, day, 0, 0, 0)
+                cal.set(Calendar.MILLISECOND, 0)
+                fechaNacimientoTimestamp = cal.timeInMillis
+                val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                etFechaNacimiento.setText(fmt.format(cal.time))
+            },
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
     // ── Render lista de perfiles ─────────────────────────────────────────────
 
     private fun renderPerfiles() {
