@@ -81,6 +81,16 @@
                             android:textAppearance="@style/TextAppearance.App.GlucoseValue" />
 
                         <TextView
+                            android:id="@+id/tvTendencia"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="6dp"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=" mg/dL"

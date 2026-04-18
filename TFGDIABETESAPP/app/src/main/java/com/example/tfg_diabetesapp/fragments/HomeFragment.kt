@@ -29,6 +29,7 @@ import com.example.tfg_diabetesapp.PerfilHorario
 import com.example.tfg_diabetesapp.R
 import com.example.tfg_diabetesapp.glucose.GlucoseMeasurement
 import com.example.tfg_diabetesapp.glucose.LibreLinkUpRepository
+import com.google.firebase.firestore.SetOptions
 import com.example.tfg_diabetesapp.widgets.MedicalHeaderView
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.LimitLine
@@ -66,6 +67,7 @@ class HomeFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
 
     private lateinit var tvGlucosa: TextView
+    private lateinit var tvTendencia: TextView
     private lateinit var tvIOB: TextView
     private lateinit var tvLastUpdated: TextView
     private lateinit var homeHeader: MedicalHeaderView
@@ -80,7 +82,7 @@ class HomeFragment : Fragment() {
     private var alarmasActivas: Boolean = false
     private var perfiles: List<PerfilHorario> = emptyList()
 
-    private var lastKnownGlucose: Int? = null
+    private var lastKnownReading: GlucoseMeasurement? = null
 
     private val notifPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -98,6 +100,7 @@ class HomeFragment : Fragment() {
         homeHeader = view.findViewById(R.id.homeHeader)
         val cardNewBolo = view.findViewById<MaterialCardView>(R.id.cardNewBolo)
         tvGlucosa = view.findViewById(R.id.tvGlucosaMain)
+        tvTendencia = view.findViewById(R.id.tvTendencia)
         tvIOB = view.findViewById(R.id.tvIOB)
         tvLastUpdated = view.findViewById(R.id.tvLastUpdated)
         pbGlucoseLoading = view.findViewById(R.id.pbGlucoseLoading)
@@ -207,6 +210,7 @@ class HomeFragment : Fragment() {
         if (libreEmail.isEmpty() || librePassword.isEmpty()) {
             withContext(Dispatchers.Main) {
                 tvGlucosa.text = "--"
+                tvTendencia.text = ""
                 tvLastUpdated.text = "Configura tu cuenta LibreLinkUp en Ajustes"
             }
             return
@@ -217,29 +221,67 @@ class HomeFragment : Fragment() {
             tvLastUpdated.text = "Sincronizando..."
         }
 
-        val value = withContext(Dispatchers.IO) {
+        val measurement = withContext(Dispatchers.IO) {
             LibreLinkUpRepository.getLatestGlucose(libreEmail, librePassword)
         }
 
         withContext(Dispatchers.Main) {
             pbGlucoseLoading.visibility = View.GONE
-            if (value != null) {
-                lastKnownGlucose = value
+            if (measurement != null) {
+                lastKnownReading = measurement
                 tvGlucosa.alpha = 1f
-                updateGlucoseCard(value.toDouble(), stale = false)
+                updateGlucoseCard(measurement.value.toDouble(), measurement.trendArrow, stale = false)
                 val hora = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                 tvLastUpdated.text = "Última act. $hora"
-                checkGlucoseAlert(value)
-            } else if (lastKnownGlucose != null) {
+                checkGlucoseAlert(measurement.value)
+                saveGlucoseReading(measurement)
+            } else if (lastKnownReading != null) {
                 tvGlucosa.alpha = 0.55f
-                updateGlucoseCard(lastKnownGlucose!!.toDouble(), stale = true)
+                updateGlucoseCard(lastKnownReading!!.value.toDouble(), lastKnownReading!!.trendArrow, stale = true)
                 tvLastUpdated.text = "Sin conexión · dato anterior"
             } else {
                 tvGlucosa.text = "--"
+                tvTendencia.text = ""
                 tvGlucosa.alpha = 1f
                 tvLastUpdated.text = "Sin conexión"
             }
         }
+    }
+
+    private fun saveGlucoseReading(measurement: GlucoseMeasurement) {
+        val userId = auth.currentUser?.uid ?: return
+        val fecha = parseTimestampToMillis(measurement.timestamp) ?: return
+        val data = mapOf(
+            "fecha" to fecha,
+            "valor" to measurement.value,
+            "tendencia" to measurement.trendArrow,
+            "fuente" to "LibreLinkUp"
+        )
+        db.collection("users").document(userId)
+            .collection("glucoseReadings").document(fecha.toString())
+            .set(data, SetOptions.merge())
+    }
+
+    private fun parseTimestampToMillis(timestamp: String): Long? {
+        val parsers = listOf(
+            SimpleDateFormat("M/d/yyyy h:mm:ss a", Locale.US),
+            SimpleDateFormat("M/d/yyyy H:mm:ss", Locale.US),
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US),
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        )
+        for (p in parsers) try { return p.parse(timestamp)?.time } catch (_: Exception) {}
+        return null
+    }
+
+    private fun trendArrowText(trend: Int): String = when (trend) {
+        0 -> "↓↓"
+        1 -> "↓"
+        2 -> "↘"
+        3 -> "→"
+        4 -> "↗"
+        5 -> "↑"
+        6 -> "↑↑"
+        else -> ""
     }
 
     private suspend fun fetchGlucoseChart() {
@@ -362,15 +404,18 @@ class HomeFragment : Fragment() {
 
     // ── Color glucosa ────────────────────────────────────────────────────────
 
-    private fun updateGlucoseCard(glucosa: Double, stale: Boolean = false) {
+    private fun updateGlucoseCard(glucosa: Double, trend: Int = 0, stale: Boolean = false) {
         tvGlucosa.text = glucosa.roundToInt().toString()
         val color = when {
-            stale         -> android.R.color.darker_gray
+            stale                -> android.R.color.darker_gray
             glucosa < umbralBajo -> android.R.color.holo_red_light
             glucosa > umbralAlto -> android.R.color.holo_orange_light
-            else          -> R.color.green_ok
+            else                 -> R.color.green_ok
         }
-        tvGlucosa.setTextColor(ContextCompat.getColor(requireContext(), color))
+        val resolvedColor = ContextCompat.getColor(requireContext(), color)
+        tvGlucosa.setTextColor(resolvedColor)
+        tvTendencia.text = trendArrowText(trend)
+        tvTendencia.setTextColor(resolvedColor)
     }
 
     // ── Alarmas ──────────────────────────────────────────────────────────────
