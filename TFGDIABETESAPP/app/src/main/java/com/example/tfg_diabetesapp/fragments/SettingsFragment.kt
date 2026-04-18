@@ -61,6 +61,8 @@ class SettingsFragment : Fragment() {
     private lateinit var llPerfiles: LinearLayout
 
     companion object {
+        val SEXO_OPTIONS = listOf("Hombre", "Mujer", "Otro")
+        val TIPO_DIABETES_OPTIONS = listOf("Tipo 1", "Tipo 2", "LADA")
         val INSULINA_OPTIONS = listOf(
             "Novorapid / Humalog (4 h)",
             "Fiasp / Lyumjev (5 h)",
