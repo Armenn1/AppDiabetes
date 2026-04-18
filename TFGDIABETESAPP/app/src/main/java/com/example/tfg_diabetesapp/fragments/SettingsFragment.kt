@@ -165,6 +165,14 @@ class SettingsFragment : Fragment() {
             Toast.makeText(requireContext(), "Por favor rellena los campos médicos", Toast.LENGTH_SHORT).show()
             return
         }
+        val factorHC = factorText.toDoubleOrNull()?.takeIf { it > 0 } ?: run {
+            Toast.makeText(requireContext(), "Ratio HC no válido (debe ser mayor que 0)", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val sensibilidad = sensibilidadText.toDoubleOrNull()?.takeIf { it > 0 } ?: run {
+            Toast.makeText(requireContext(), "Sensibilidad no válida (debe ser mayor que 0)", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (insulinaText == INSULINA_OPTIONS.last() && etDiaPersonalizado.text.toString().toDoubleOrNull() == null) {
             Toast.makeText(requireContext(), "Introduce las horas de duración de tu insulina", Toast.LENGTH_SHORT).show()
             return
@@ -188,8 +196,8 @@ class SettingsFragment : Fragment() {
         }
 
         val data = hashMapOf<String, Any>(
-            "factorHC" to factorText.toDouble(),
-            "sensibilidad" to sensibilidadText.toDouble(),
+            "factorHC" to factorHC,
+            "sensibilidad" to sensibilidad,
             "objetivoMin" to objetivoMin,
             "objetivoMax" to objetivoMax,
             "libreEmail" to libreEmailText,

@@ -11,9 +11,10 @@ object IobCalculator {
     fun calcular(logs: List<BoloLog>, diaMinutos: Int): Double {
         val ahora = System.currentTimeMillis()
         return logs.sumOf { log ->
+            val dosis = maxOf(0.0, log.dosisTotal)
             val minutosDesde = (ahora - log.fecha) / 60_000.0
             val factorRestante = 1.0 - (minutosDesde / diaMinutos)
-            if (factorRestante > 0) log.dosisTotal * factorRestante else 0.0
+            if (factorRestante > 0) dosis * factorRestante else 0.0
         }
     }
 }

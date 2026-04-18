@@ -85,8 +85,14 @@ class BoloActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val glucosa = sGlucosa.toDouble()
-            val raciones = sRaciones.toDouble()
+            val glucosa = sGlucosa.toDoubleOrNull() ?: run {
+                Toast.makeText(this, "Glucosa no válida", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val raciones = sRaciones.toDoubleOrNull() ?: run {
+                Toast.makeText(this, "Raciones no válidas", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             // A) Hipoglucemia
             if (glucosa < 70) {
@@ -102,7 +108,7 @@ class BoloActivity : AppCompatActivity() {
                 tvDesglose.setTextColor(
                     androidx.core.content.ContextCompat.getColor(this, android.R.color.white)
                 )
-                saveLogToFirebase(glucosa, raciones, 0.0, 0.0, 0.0)
+                saveLogToFirebase(glucosa, raciones, 0.0, 0.0, 0.0, tipo = "Hipoglucemia")
                 return@setOnClickListener
             }
 
@@ -116,6 +122,11 @@ class BoloActivity : AppCompatActivity() {
             tvDesglose.setTextColor(
                 androidx.core.content.ContextCompat.getColor(this, android.R.color.darker_gray)
             )
+
+            if (effectiveSensibilidad <= 0 || effectiveRatio <= 0) {
+                Toast.makeText(this, "Configura tu ratio y sensibilidad en Ajustes", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
 
             val insuComida = raciones * effectiveRatio
             val correctionTarget = (myObjetivoMin + myObjetivoMax) / 2.0
@@ -250,7 +261,8 @@ class BoloActivity : AppCompatActivity() {
         comida: Double,
         correccion: Double,
         total: Double,
-        iobDescontado: Double = 0.0
+        iobDescontado: Double = 0.0,
+        tipo: String = "Calculadora"
     ) {
         val userId = auth.currentUser?.uid ?: return
         val nuevoLog = BoloLog(
@@ -260,7 +272,8 @@ class BoloActivity : AppCompatActivity() {
             dosisCorreccion = correccion,
             dosisTotal = total,
             iobDescontado = iobDescontado,
-            fecha = System.currentTimeMillis()
+            fecha = System.currentTimeMillis(),
+            tipo = tipo
         )
         db.collection("users").document(userId).collection("history").add(nuevoLog)
     }
