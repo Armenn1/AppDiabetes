@@ -34,7 +34,8 @@ class SettingsFragment : Fragment() {
     // ── Vistas globales ──────────────────────────────────────────────────────
     private lateinit var etFactorHC: EditText
     private lateinit var etSensibilidad: EditText
-    private lateinit var etObjetivo: EditText
+    private lateinit var etObjetivoMin: EditText
+    private lateinit var etObjetivoMax: EditText
     private lateinit var etUmbralBajo: EditText
     private lateinit var etUmbralAlto: EditText
     private lateinit var switchAlarmas: MaterialSwitch
@@ -44,6 +45,16 @@ class SettingsFragment : Fragment() {
     private lateinit var tilDiaPersonalizado: TextInputLayout
     private lateinit var etDiaPersonalizado: EditText
     private lateinit var btnSaveSettings: Button
+
+    // ── Perfil Personal ──────────────────────────────────────────────────────
+    private lateinit var etPeso: EditText
+    private lateinit var etAltura: EditText
+    private lateinit var actvSexo: AutoCompleteTextView
+    private lateinit var etFechaNacimiento: EditText
+    private lateinit var actvTipoDiabetes: AutoCompleteTextView
+    private lateinit var etInsulinaBasal: EditText
+    private lateinit var etDosisBasal: EditText
+    private var fechaNacimientoTimestamp: Long? = null
 
     // ── Perfiles horarios ────────────────────────────────────────────────────
     private val perfiles = mutableListOf<PerfilHorario>()
