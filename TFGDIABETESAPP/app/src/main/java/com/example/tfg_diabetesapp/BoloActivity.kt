@@ -30,7 +30,8 @@ class BoloActivity : AppCompatActivity() {
     // Ajustes médicos globales (fallback cuando no hay perfil activo)
     private var myRatio: Double = 0.0
     private var mySensibilidad: Double = 0.0
-    private var myTarget: Double = 100.0
+    private var myObjetivoMin: Double = 70.0
+    private var myObjetivoMax: Double = 180.0
     private var myDia: Double = 4.0
 
     // Perfiles horarios del usuario
@@ -117,7 +118,8 @@ class BoloActivity : AppCompatActivity() {
             )
 
             val insuComida = raciones * effectiveRatio
-            val insuCorreccion = (glucosa - myTarget) / effectiveSensibilidad
+            val correctionTarget = (myObjetivoMin + myObjetivoMax) / 2.0
+            val insuCorreccion = (glucosa - correctionTarget) / effectiveSensibilidad
             var total = insuComida + insuCorreccion - currentIob
             if (total < 0) total = 0.0
 
@@ -159,7 +161,10 @@ class BoloActivity : AppCompatActivity() {
 
                 val ratio = document.getDouble("factorHC")
                 val sensi = document.getDouble("sensibilidad")
-                val target = document.getDouble("target") ?: 100.0
+                // Retrocompatible con el antiguo campo "target"
+                val legacyTarget = document.getDouble("target")
+                val objetivoMin = document.getDouble("objetivoMin") ?: legacyTarget ?: 70.0
+                val objetivoMax = document.getDouble("objetivoMax") ?: 180.0
                 val dia = document.getDouble("diaHoras") ?: 4.0
 
                 if (ratio == null || sensi == null) {
@@ -169,7 +174,8 @@ class BoloActivity : AppCompatActivity() {
 
                 myRatio = ratio
                 mySensibilidad = sensi
-                myTarget = target
+                myObjetivoMin = objetivoMin
+                myObjetivoMax = objetivoMax
                 myDia = dia
 
                 @Suppress("UNCHECKED_CAST")
