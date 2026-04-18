@@ -89,7 +89,8 @@ class SettingsFragment : Fragment() {
 
         etFactorHC = view.findViewById(R.id.etFactorHC)
         etSensibilidad = view.findViewById(R.id.etSensibilidad)
-        etObjetivo = view.findViewById(R.id.etObjetivo)
+        etObjetivoMin = view.findViewById(R.id.etObjetivoMin)
+        etObjetivoMax = view.findViewById(R.id.etObjetivoMax)
         etUmbralBajo = view.findViewById(R.id.etUmbralBajo)
         etUmbralAlto = view.findViewById(R.id.etUmbralAlto)
         switchAlarmas = view.findViewById(R.id.switchAlarmas)
@@ -99,6 +100,22 @@ class SettingsFragment : Fragment() {
         tilDiaPersonalizado = view.findViewById(R.id.tilDiaPersonalizado)
         etDiaPersonalizado = view.findViewById(R.id.etDiaPersonalizado)
         llPerfiles = view.findViewById(R.id.llPerfiles)
+
+        // Perfil Personal
+        etPeso = view.findViewById(R.id.etPeso)
+        etAltura = view.findViewById(R.id.etAltura)
+        actvSexo = view.findViewById(R.id.actvSexo)
+        etFechaNacimiento = view.findViewById(R.id.etFechaNacimiento)
+        actvTipoDiabetes = view.findViewById(R.id.actvTipoDiabetes)
+        etInsulinaBasal = view.findViewById(R.id.etInsulinaBasal)
+        etDosisBasal = view.findViewById(R.id.etDosisBasal)
+
+        // Dropdowns perfil personal
+        actvSexo.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, SEXO_OPTIONS))
+        actvTipoDiabetes.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, TIPO_DIABETES_OPTIONS))
+
+        // Date picker para fecha de nacimiento
+        etFechaNacimiento.setOnClickListener { showDatePicker() }
 
         // Dropdown insulina
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, INSULINA_OPTIONS)
@@ -120,19 +137,26 @@ class SettingsFragment : Fragment() {
     private fun onSaveClick() {
         val factorText = etFactorHC.text.toString()
         val sensibilidadText = etSensibilidad.text.toString()
-        val objetivoText = etObjetivo.text.toString()
+        val objetivoMinText = etObjetivoMin.text.toString()
+        val objetivoMaxText = etObjetivoMax.text.toString()
         val libreEmailText = etLibreEmail.text.toString().trim()
         val librePasswordText = etLibrePassword.text.toString()
         val insulinaText = actvInsulina.text.toString()
         val umbralBajoText = etUmbralBajo.text.toString()
         val umbralAltoText = etUmbralAlto.text.toString()
 
-        if (factorText.isEmpty() || sensibilidadText.isEmpty() || objetivoText.isEmpty()) {
+        if (factorText.isEmpty() || sensibilidadText.isEmpty() || objetivoMinText.isEmpty() || objetivoMaxText.isEmpty()) {
             Toast.makeText(requireContext(), "Por favor rellena los campos médicos", Toast.LENGTH_SHORT).show()
             return
         }
         if (insulinaText == INSULINA_OPTIONS[2] && etDiaPersonalizado.text.toString().toDoubleOrNull() == null) {
             Toast.makeText(requireContext(), "Introduce las horas de duración de tu insulina", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val objetivoMin = objetivoMinText.toDoubleOrNull() ?: 70.0
+        val objetivoMax = objetivoMaxText.toDoubleOrNull() ?: 180.0
+        if (objetivoMin >= objetivoMax) {
+            Toast.makeText(requireContext(), "El objetivo mínimo debe ser menor que el máximo", Toast.LENGTH_SHORT).show()
             return
         }
         val umbralBajo = umbralBajoText.toDoubleOrNull() ?: 70.0
@@ -147,10 +171,11 @@ class SettingsFragment : Fragment() {
             return
         }
 
-        val data = hashMapOf(
+        val data = hashMapOf<String, Any>(
             "factorHC" to factorText.toDouble(),
             "sensibilidad" to sensibilidadText.toDouble(),
-            "target" to objetivoText.toDouble(),
+            "objetivoMin" to objetivoMin,
+            "objetivoMax" to objetivoMax,
             "libreEmail" to libreEmailText,
             "librePassword" to librePasswordText,
             "diaHoras" to diaDesdeOpcion(insulinaText, etDiaPersonalizado.text.toString()),
@@ -158,6 +183,15 @@ class SettingsFragment : Fragment() {
             "umbralAlto" to umbralAlto,
             "alarmasActivas" to switchAlarmas.isChecked
         )
+
+        // Perfil personal (solo se guardan los campos que tengan valor)
+        etPeso.text.toString().toDoubleOrNull()?.let { data["peso"] = it }
+        etAltura.text.toString().toDoubleOrNull()?.let { data["altura"] = it }
+        actvSexo.text.toString().takeIf { it.isNotEmpty() }?.let { data["sexo"] = it }
+        fechaNacimientoTimestamp?.let { data["fechaNacimiento"] = it }
+        actvTipoDiabetes.text.toString().takeIf { it.isNotEmpty() }?.let { data["tipoDiabetes"] = it }
+        etInsulinaBasal.text.toString().takeIf { it.isNotEmpty() }?.let { data["insulinaBasal"] = it }
+        etDosisBasal.text.toString().toDoubleOrNull()?.let { data["dosisBasal"] = it }
 
         db.collection("users").document(userId)
             .set(data, SetOptions.merge())
@@ -179,7 +213,10 @@ class SettingsFragment : Fragment() {
 
                 val factor = document.getDouble("factorHC")
                 val sensi = document.getDouble("sensibilidad")
-                val target = document.getDouble("target") ?: 100.0
+                // Leer objetivoMin/objetivoMax; retrocompatible con el antiguo campo "target"
+                val legacyTarget = document.getDouble("target")
+                val objetivoMin = document.getDouble("objetivoMin") ?: legacyTarget ?: 70.0
+                val objetivoMax = document.getDouble("objetivoMax") ?: 180.0
                 val libreEmail = document.getString("libreEmail") ?: ""
                 val librePassword = document.getString("librePassword") ?: ""
                 val diaHoras = document.getDouble("diaHoras") ?: 4.0
@@ -189,12 +226,26 @@ class SettingsFragment : Fragment() {
 
                 if (factor != null) etFactorHC.setText(factor.toString())
                 if (sensi != null) etSensibilidad.setText(sensi.toString())
-                etObjetivo.setText(target.toString())
+                etObjetivoMin.setText(objetivoMin.toInt().toString())
+                etObjetivoMax.setText(objetivoMax.toInt().toString())
                 etUmbralBajo.setText(umbralBajo.toInt().toString())
                 etUmbralAlto.setText(umbralAlto.toInt().toString())
                 switchAlarmas.isChecked = alarmasActivas
                 etLibreEmail.setText(libreEmail)
                 etLibrePassword.setText(librePassword)
+
+                // Perfil personal
+                document.getDouble("peso")?.let { etPeso.setText(it.toString()) }
+                document.getDouble("altura")?.let { etAltura.setText(it.toString()) }
+                document.getString("sexo")?.takeIf { it.isNotEmpty() }?.let { actvSexo.setText(it, false) }
+                document.getLong("fechaNacimiento")?.let { ts ->
+                    fechaNacimientoTimestamp = ts
+                    val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    etFechaNacimiento.setText(fmt.format(ts))
+                }
+                document.getString("tipoDiabetes")?.takeIf { it.isNotEmpty() }?.let { actvTipoDiabetes.setText(it, false) }
+                document.getString("insulinaBasal")?.takeIf { it.isNotEmpty() }?.let { etInsulinaBasal.setText(it) }
+                document.getDouble("dosisBasal")?.let { etDosisBasal.setText(it.toString()) }
 
                 val indice = indiceDesdeDia(diaHoras)
                 actvInsulina.setText(INSULINA_OPTIONS[indice], false)
