@@ -161,7 +161,10 @@ class BoloActivity : AppCompatActivity() {
 
                 val ratio = document.getDouble("factorHC")
                 val sensi = document.getDouble("sensibilidad")
-                val target = document.getDouble("target") ?: 100.0
+                // Retrocompatible con el antiguo campo "target"
+                val legacyTarget = document.getDouble("target")
+                val objetivoMin = document.getDouble("objetivoMin") ?: legacyTarget ?: 70.0
+                val objetivoMax = document.getDouble("objetivoMax") ?: 180.0
                 val dia = document.getDouble("diaHoras") ?: 4.0
 
                 if (ratio == null || sensi == null) {
@@ -171,7 +174,8 @@ class BoloActivity : AppCompatActivity() {
 
                 myRatio = ratio
                 mySensibilidad = sensi
-                myTarget = target
+                myObjetivoMin = objetivoMin
+                myObjetivoMax = objetivoMax
                 myDia = dia
 
                 @Suppress("UNCHECKED_CAST")
