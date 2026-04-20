@@ -202,6 +202,9 @@ class HomeFragment : Fragment() {
                     viewLifecycleOwner.lifecycleScope.launch { fetchGlucoseChart() }
                 }
             }
+            .addOnFailureListener {
+                tvLastUpdated.text = "Error al cargar ajustes"
+            }
     }
 
     // ── Fetch glucosa ────────────────────────────────────────────────────────
