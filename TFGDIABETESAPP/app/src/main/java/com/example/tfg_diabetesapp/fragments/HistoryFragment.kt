@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tfg_diabetesapp.BoloLog
@@ -64,8 +65,53 @@ class HistoryFragment : Fragment() {
             mostrarMenuRegistro()
         }
 
+        val swipeHandler = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder,
+                                target: RecyclerView.ViewHolder) = false
+
+            override fun getSwipeDirs(recyclerView: RecyclerView,
+                                      viewHolder: RecyclerView.ViewHolder): Int {
+                // No permitir swipe en headers
+                val item = adapter.getItem(viewHolder.adapterPosition)
+                return if (item is HistoryAdapter.HistoryItem.Registro) super.getSwipeDirs(recyclerView, viewHolder)
+                else 0
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val item = adapter.getItem(viewHolder.adapterPosition)
+                if (item is HistoryAdapter.HistoryItem.Registro) {
+                    confirmarBorrado(item.log)
+                } else {
+                    adapter.updateLista(todosLosRegistros)
+                }
+            }
+        }
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(rvHistory)
+
         cargarHistorial()
         return view
+    }
+
+    private fun confirmarBorrado(log: BoloLog) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Eliminar registro")
+            .setMessage("¿Seguro que quieres eliminar este registro?")
+            .setPositiveButton("Eliminar") { _, _ ->
+                val userId = auth.currentUser?.uid ?: return@setPositiveButton
+                db.collection("users").document(userId)
+                    .collection("history")
+                    .whereEqualTo("fecha", log.fecha)
+                    .get()
+                    .addOnSuccessListener { docs ->
+                        docs.forEach { it.reference.delete() }
+                        cargarHistorial()
+                    }
+            }
+            .setNegativeButton("Cancelar") { _, _ ->
+                // Restaurar el item visualmente
+                adapter.updateLista(todosLosRegistros)
+            }
+            .show()
     }
 
     // ── Carga desde Firestore ────────────────────────────────────────────────
