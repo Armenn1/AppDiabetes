@@ -295,8 +295,49 @@ class HomeFragment : Fragment() {
             LibreLinkUpRepository.getGlucoseData(libreEmail, librePassword)
         }
         withContext(Dispatchers.Main) {
-            if (result != null) updateGlucoseChart(result.graphMeasurements)
+            if (result != null) {
+                updateGlucoseChart(result.graphMeasurements)
+                saveGlucoseChartToFirestore(result.graphMeasurements)
+            }
         }
+    }
+
+    private fun saveGlucoseChartToFirestore(measurements: List<GlucoseMeasurement>) {
+        val userId = auth.currentUser?.uid ?: return
+        if (measurements.isEmpty()) return
+
+        val colRef = db.collection("users").document(userId).collection("glucoseReadings")
+        val batch = db.batch()
+        var count = 0
+
+        val parsers = listOf(
+            SimpleDateFormat("M/d/yyyy h:mm:ss a", Locale.US),
+            SimpleDateFormat("M/d/yyyy H:mm:ss", Locale.US),
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US),
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        )
+
+        for (m in measurements) {
+            var fecha: Long? = null
+            for (p in parsers) {
+                try { fecha = p.parse(m.timestamp)?.time; if (fecha != null) break }
+                catch (_: Exception) {}
+            }
+            if (fecha == null) continue
+
+            val data = mapOf(
+                "fecha"     to fecha,
+                "valor"     to m.value,
+                "tendencia" to m.trendArrow,
+                "fuente"    to "LibreLinkUp"
+            )
+            // Usar el timestamp como ID — idempotente, no duplica si se llama varias veces
+            batch.set(colRef.document(fecha.toString()), data)
+            count++
+            if (count == 500) break   // límite de Firestore batch
+        }
+
+        if (count > 0) batch.commit()
     }
 
     // ── Gráfica ──────────────────────────────────────────────────────────────
