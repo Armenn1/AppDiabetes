@@ -23,6 +23,7 @@ class BoloActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_RACIONES = "raciones"
+        const val EXTRA_IMAGEN_URL = "imagenUrl"
     }
 
     private val db = FirebaseFirestore.getInstance()
@@ -47,6 +48,7 @@ class BoloActivity : AppCompatActivity() {
     private var dataLoaded = false
 
     private var tendenciaExtra: Int = 0
+    private var imagenUrlExtra: String = ""
 
     // ── Ratio y sensibilidad efectivos (perfil activo o globales) ────────────
     private val effectiveRatio get() = PerfilHorario.getActivo(perfiles)?.factorHC ?: myRatio
@@ -63,6 +65,7 @@ class BoloActivity : AppCompatActivity() {
         setContentView(R.layout.activity_bolo)
 
         tendenciaExtra = intent.getIntExtra("tendencia", 0)
+        imagenUrlExtra = intent.getStringExtra(EXTRA_IMAGEN_URL) ?: ""
         val racionesExtra = intent.getDoubleExtra(EXTRA_RACIONES, -1.0)
 
         MobileAds.initialize(this)
@@ -288,7 +291,8 @@ class BoloActivity : AppCompatActivity() {
             tipo = tipo,
             tendencia = tendenciaExtra,
             tipoComida = inferirTipoComida(),
-            perfilHoraInicio = PerfilHorario.getActivo(perfiles)?.horaInicio
+            perfilHoraInicio = PerfilHorario.getActivo(perfiles)?.horaInicio,
+            imagenUrl = imagenUrlExtra
         )
         db.collection("users").document(userId).collection("history").add(nuevoLog)
     }

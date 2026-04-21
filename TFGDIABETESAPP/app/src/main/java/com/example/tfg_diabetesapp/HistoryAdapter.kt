@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -137,10 +138,11 @@ class HistoryAdapter(private var items: List<HistoryItem>) :
             h.tvTipoComida.visibility = View.GONE
         }
 
-        // Foto (disponible en Fase 3A)
-        if (log.imagenUrl.isNotEmpty()) {
+        // Foto (cache local en filesDir/meal_photos)
+        val file = if (log.imagenUrl.isNotEmpty()) File(log.imagenUrl) else null
+        if (file != null && file.exists()) {
             h.ivFoto.visibility = View.VISIBLE
-            h.ivFoto.load(log.imagenUrl) {
+            h.ivFoto.load(file) {
                 crossfade(true)
                 size(120, 120)
             }
