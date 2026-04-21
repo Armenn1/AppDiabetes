@@ -21,6 +21,10 @@ import kotlin.math.roundToInt
 
 class BoloActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_RACIONES = "raciones"
+    }
+
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -59,12 +63,16 @@ class BoloActivity : AppCompatActivity() {
         setContentView(R.layout.activity_bolo)
 
         tendenciaExtra = intent.getIntExtra("tendencia", 0)
+        val racionesExtra = intent.getDoubleExtra(EXTRA_RACIONES, -1.0)
 
         MobileAds.initialize(this)
         loadInterstitialAd()
 
         val etGlucosa = findViewById<EditText>(R.id.etGlucosaActual)
         val etRaciones = findViewById<EditText>(R.id.etRaciones)
+        if (racionesExtra > 0) {
+            etRaciones.setText(racionesExtra.toString())
+        }
         val btnCalcular = findViewById<MaterialButton>(R.id.btnCalcular)
         val boloHeader = findViewById<MedicalHeaderView>(R.id.boloHeader)
         val cardResult = findViewById<MaterialCardView>(R.id.cardResult)

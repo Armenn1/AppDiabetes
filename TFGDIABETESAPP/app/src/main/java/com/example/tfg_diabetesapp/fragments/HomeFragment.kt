@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.BoloLog
+import com.example.tfg_diabetesapp.CarbsCalculator
+import com.example.tfg_diabetesapp.FoodScanResult
 import com.example.tfg_diabetesapp.IobCalculator
 import com.example.tfg_diabetesapp.LoginActivity
 import com.example.tfg_diabetesapp.MainActivity
@@ -69,6 +71,7 @@ class HomeFragment : Fragment() {
     private lateinit var tvGlucosa: TextView
     private lateinit var tvTendencia: TextView
     private lateinit var tvIOB: TextView
+    private lateinit var tvCOB: TextView
     private lateinit var tvLastUpdated: TextView
     private lateinit var homeHeader: MedicalHeaderView
     private lateinit var pbGlucoseLoading: ProgressBar
@@ -102,6 +105,7 @@ class HomeFragment : Fragment() {
         tvGlucosa = view.findViewById(R.id.tvGlucosaMain)
         tvTendencia = view.findViewById(R.id.tvTendencia)
         tvIOB = view.findViewById(R.id.tvIOB)
+        tvCOB = view.findViewById(R.id.tvCOB)
         tvLastUpdated = view.findViewById(R.id.tvLastUpdated)
         pbGlucoseLoading = view.findViewById(R.id.pbGlucoseLoading)
         glucoseChart = view.findViewById(R.id.glucoseChart)
@@ -154,6 +158,28 @@ class HomeFragment : Fragment() {
         super.onResume()
         loadUserSettings()
         refreshIobData()
+        refreshCobData()
+    }
+
+    private fun refreshCobData() {
+        val userId = auth.currentUser?.uid ?: return
+        val cutoffCob = System.currentTimeMillis() - (270 * 60_000L)
+        db.collection("users").document(userId)
+            .collection("mealScans")
+            .whereGreaterThan("fecha", cutoffCob)
+            .get()
+            .addOnSuccessListener { docs ->
+                val scans = docs.map { d ->
+                    FoodScanResult(
+                        fecha = d.getLong("fecha") ?: 0L,
+                        carbohidratosNetos = d.getDouble("carbohidratosNetos") ?: 0.0,
+                        grasas = d.getDouble("grasas") ?: 0.0
+                    )
+                }
+                val cob = CarbsCalculator.calcular(scans)
+                tvCOB.text = "${(cob * 10).roundToInt() / 10.0} g"
+            }
+            .addOnFailureListener { tvCOB.text = "0 g" }
     }
 
     // ── Saludo dinámico ──────────────────────────────────────────────────────
