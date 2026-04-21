@@ -291,14 +291,14 @@
                         android:layout_marginTop="@dimen/space_md"
                         app:layout_constraintTop_toBottomOf="@id/tvDescripcionComida" />
 
-                    <!-- Grid 2x3 -->
-                    <androidx.gridlayout.widget.GridLayout
-                        android:id="@+id/gridMetricas"
+                    <!-- Fila 1 del grid -->
+                    <LinearLayout
+                        android:id="@+id/gridMetricasRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false"
                         android:layout_marginTop="@dimen/space_md"
-                        app:columnCount="3"
-                        app:rowCount="2"
                         app:layout_constraintTop_toBottomOf="@id/dividerResultado"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
@@ -306,11 +306,10 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="@dimen/space_sm"
-                            app:layout_columnWeight="1"
-                            app:layout_rowWeight="1">
+                            android:padding="@dimen/space_sm">
 
                             <TextView
                                 android:id="@+id/tvCarbohidratos"
@@ -331,11 +330,10 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="@dimen/space_sm"
-                            app:layout_columnWeight="1"
-                            app:layout_rowWeight="1">
+                            android:padding="@dimen/space_sm">
 
                             <TextView
                                 android:id="@+id/tvFibra"
@@ -356,11 +354,10 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="@dimen/space_sm"
-                            app:layout_columnWeight="1"
-                            app:layout_rowWeight="1">
+                            android:padding="@dimen/space_sm">
 
                             <TextView
                                 android:id="@+id/tvProteinas"
@@ -377,15 +374,26 @@
                                 android:text="Proteínas"
                                 android:textAppearance="@style/TextAppearance.App.Caption" />
                         </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Fila 2 del grid -->
+                    <LinearLayout
+                        android:id="@+id/gridMetricasRow2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false"
+                        app:layout_constraintTop_toBottomOf="@id/gridMetricasRow1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="@dimen/space_sm"
-                            app:layout_columnWeight="1"
-                            app:layout_rowWeight="1">
+                            android:padding="@dimen/space_sm">
 
                             <TextView
                                 android:id="@+id/tvGrasas"
@@ -406,11 +414,10 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="@dimen/space_sm"
-                            app:layout_columnWeight="1"
-                            app:layout_rowWeight="1">
+                            android:padding="@dimen/space_sm">
 
                             <TextView
                                 android:id="@+id/tvRaciones"
@@ -431,11 +438,10 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="@dimen/space_sm"
-                            app:layout_columnWeight="1"
-                            app:layout_rowWeight="1">
+                            android:padding="@dimen/space_sm">
 
                             <TextView
                                 android:id="@+id/tvIndiceGlucemico"
@@ -452,8 +458,7 @@
                                 android:text="Índice Gluc."
                                 android:textAppearance="@style/TextAppearance.App.Caption" />
                         </LinearLayout>
-
-                    </androidx.gridlayout.widget.GridLayout>
+                    </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
