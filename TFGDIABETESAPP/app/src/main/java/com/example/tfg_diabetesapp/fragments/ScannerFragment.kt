@@ -153,6 +153,7 @@ class ScannerFragment : Fragment() {
                 val intent = Intent(requireContext(), BoloActivity::class.java).apply {
                     putExtra(BoloActivity.EXTRA_RACIONES, scan.raciones)
                     putExtra("tendencia", tendenciaActual)
+                    putExtra(BoloActivity.EXTRA_IMAGEN_URL, scan.imagenUrl)
                 }
                 startActivity(intent)
             }
@@ -273,8 +274,10 @@ class ScannerFragment : Fragment() {
                     .removeSuffix("```").trim()
 
                 val json = JSONObject(jsonStr)
+                val ahora = System.currentTimeMillis()
+                val rutaFoto = guardarBitmapLocal(bitmap, ahora)
                 val scan = FoodScanResult(
-                    fecha               = System.currentTimeMillis(),
+                    fecha               = ahora,
                     comida              = json.optString("comida", "Plato desconocido"),
                     descripcion         = json.optString("descripcion", ""),
                     carbohidratos       = json.optDouble("carbohidratos", 0.0),
@@ -290,7 +293,8 @@ class ScannerFragment : Fragment() {
                     tendenciaAlEscanear = tendenciaActual,
                     iobAlEscanear       = iobActual,
                     cobAlEscanear       = cobActual,
-                    tipoComida          = inferirTipoComida()
+                    tipoComida          = inferirTipoComida(),
+                    imagenUrl           = rutaFoto
                 )
 
                 withContext(Dispatchers.Main) {
@@ -382,6 +386,17 @@ class ScannerFragment : Fragment() {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     private fun round1(v: Double) = (v * 10).roundToInt() / 10.0
+
+    private fun guardarBitmapLocal(bitmap: Bitmap, fecha: Long): String {
+        return try {
+            val dir = File(requireContext().filesDir, "meal_photos").apply { mkdirs() }
+            val file = File(dir, "$fecha.jpg")
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+            }
+            file.absolutePath
+        } catch (_: Exception) { "" }
+    }
 
     private fun inferirTipoComida(): String {
         val hora = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
