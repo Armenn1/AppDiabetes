@@ -178,8 +178,8 @@ class ScannerFragment : Fragment() {
                         glucosaActual  = ultima?.getLong("valor")?.toInt() ?: 0
                         tendenciaActual = ultima?.getLong("tendencia")?.toInt() ?: 0
                         val tendenciaStr = when (tendenciaActual) {
-                            1 -> "↓↓"; 2 -> "↓"; 3 -> "↘"; 4 -> "→"
-                            5 -> "↗"; 6 -> "↑"; 7 -> "↑↑"; else -> ""
+                            1 -> "↓↓"; 2 -> "↓"; 3 -> "→"; 4 -> "↑"; 5 -> "↑↑"
+                            else -> ""
                         }
                         tvContextGlucosa.text = if (glucosaActual > 0)
                             "$glucosaActual mg/dL $tendenciaStr" else "-- mg/dL"

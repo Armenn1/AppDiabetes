@@ -173,7 +173,7 @@ class HistoryAdapter(private var items: List<HistoryItem>) :
         if (log.tendencia > 0) {
             h.tvTendencia.visibility = View.VISIBLE
             h.tvTendencia.text = when (log.tendencia) {
-                1 -> "↓↓"; 2 -> "↓"; 3 -> "↘"; 4 -> "→"; 5 -> "↗"; 6 -> "↑"; 7 -> "↑↑"
+                1 -> "↓↓"; 2 -> "↓"; 3 -> "→"; 4 -> "↑"; 5 -> "↑↑"
                 else -> ""
             }
             h.tvTendencia.setTextColor(glucosaColor)
