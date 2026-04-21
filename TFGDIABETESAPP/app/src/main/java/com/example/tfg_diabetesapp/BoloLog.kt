@@ -10,5 +10,12 @@ data class BoloLog(
     val iobDescontado: Double = 0.0,
     val tipo: String = "Calculadora", // "Calculadora" | "Insulina" | "Comida"
     val nota: String = "",            // Nota libre (Insulina / Comida)
-    val gramos: Double = 0.0          // Gramos de HC (Comida)
+    val gramos: Double = 0.0,         // Gramos de HC (Comida)
+    val tendencia: Int = 0,           // flecha tendencia glucosa (0–6) al momento del bolo
+    val cobAlCalcular: Double = 0.0,  // Carbs On Board activos (0.0 hasta implementar scanner)
+    val tipoComida: String = "",      // "desayuno"|"comida"|"cena"|"snack"|"merienda"
+    val perfilHoraInicio: Int? = null,// horaInicio del PerfilHorario activo (null = perfil global)
+    val glucosaPost2h: Int? = null,   // se rellenará en fases futuras para drift detection
+    val mealScanId: String = "",      // enlace futuro al mealScan del scanner
+    val imagenUrl: String = ""        // URL Firebase Storage de la foto del plato
 )

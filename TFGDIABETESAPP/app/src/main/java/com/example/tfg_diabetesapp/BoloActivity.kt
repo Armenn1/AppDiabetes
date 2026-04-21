@@ -42,6 +42,8 @@ class BoloActivity : AppCompatActivity() {
 
     private var dataLoaded = false
 
+    private var tendenciaExtra: Int = 0
+
     // ── Ratio y sensibilidad efectivos (perfil activo o globales) ────────────
     private val effectiveRatio get() = PerfilHorario.getActivo(perfiles)?.factorHC ?: myRatio
     private val effectiveSensibilidad get() = PerfilHorario.getActivo(perfiles)?.sensibilidad ?: mySensibilidad
@@ -55,6 +57,8 @@ class BoloActivity : AppCompatActivity() {
             return
         }
         setContentView(R.layout.activity_bolo)
+
+        tendenciaExtra = intent.getIntExtra("tendencia", 0)
 
         MobileAds.initialize(this)
         loadInterstitialAd()
@@ -273,8 +277,22 @@ class BoloActivity : AppCompatActivity() {
             dosisTotal = total,
             iobDescontado = iobDescontado,
             fecha = System.currentTimeMillis(),
-            tipo = tipo
+            tipo = tipo,
+            tendencia = tendenciaExtra,
+            tipoComida = inferirTipoComida(),
+            perfilHoraInicio = PerfilHorario.getActivo(perfiles)?.horaInicio
         )
         db.collection("users").document(userId).collection("history").add(nuevoLog)
+    }
+
+    private fun inferirTipoComida(): String {
+        val hora = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return when (hora) {
+            in 6..10  -> "desayuno"
+            in 11..15 -> "comida"
+            in 16..19 -> "merienda"
+            in 20..23 -> "cena"
+            else      -> "snack"
+        }
     }
 }

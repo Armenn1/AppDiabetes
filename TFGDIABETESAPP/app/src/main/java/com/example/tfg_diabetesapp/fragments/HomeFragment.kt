@@ -111,7 +111,9 @@ class HomeFragment : Fragment() {
         setupGlucoseChart()
 
         cardNewBolo.setOnClickListener {
-            startActivity(Intent(requireContext(), BoloActivity::class.java))
+            val intent = Intent(requireContext(), BoloActivity::class.java)
+            intent.putExtra("tendencia", lastKnownReading?.trendArrow ?: 0)
+            startActivity(intent)
         }
 
         homeHeader.setOnLogoutClickListener {
