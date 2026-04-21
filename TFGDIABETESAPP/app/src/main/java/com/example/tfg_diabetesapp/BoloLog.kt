@@ -16,6 +16,10 @@ data class BoloLog(
     val tipoComida: String = "",      // "desayuno"|"comida"|"cena"|"snack"|"merienda"
     val perfilHoraInicio: Int? = null,// horaInicio del PerfilHorario activo (null = perfil global)
     val glucosaPost2h: Int? = null,   // se rellenará en fases futuras para drift detection
-    val mealScanId: String = "",      // enlace futuro al mealScan del scanner
-    val imagenUrl: String = ""        // URL Firebase Storage de la foto del plato
+    val mealScanId: String = "",      // id del mealScan vinculado (scanner)
+    val imagenUrl: String = "",       // ruta local (cache) o URL de la foto del plato
+    val proteinas: Double = 0.0,      // info nutricional (tipo="Comida")
+    val grasas: Double = 0.0,
+    val fibra: Double = 0.0,
+    val indiceGlucemico: Int = 0
 )
