@@ -79,7 +79,8 @@ class HomeFragment : Fragment() {
 
     private var libreEmail = ""
     private var librePassword = ""
-    private var diaHoras: Double = 4.0
+    private var diaHoras: Double = 5.0
+    private var peakMin: Int = 75
     private var umbralBajo: Float = 70f
     private var umbralAlto: Float = 180f
     private var alarmasActivas: Boolean = false
@@ -200,7 +201,8 @@ class HomeFragment : Fragment() {
             .addOnSuccessListener { document ->
                 val newEmail = document.getString("libreEmail") ?: ""
                 val newPassword = document.getString("librePassword") ?: ""
-                diaHoras = document.getDouble("diaHoras") ?: 4.0
+                diaHoras = document.getDouble("diaHoras") ?: 5.0
+                peakMin  = (document.getLong("insulinaPeakMin") ?: 75L).toInt()
 
                 val newUmbralBajo = (document.getDouble("umbralBajo") ?: 70.0).toFloat()
                 val newUmbralAlto = (document.getDouble("umbralAlto") ?: 180.0).toFloat()
@@ -466,7 +468,7 @@ class HomeFragment : Fragment() {
                 val logs = documents.map { doc ->
                     BoloLog(fecha = doc.getLong("fecha") ?: 0L, dosisTotal = doc.getDouble("dosisTotal") ?: 0.0)
                 }
-                val iob = IobCalculator.calcular(logs, (diaHoras * 60).toInt())
+                val iob = IobCalculator.calcular(logs, (diaHoras * 60).toInt(), peakMin)
                 tvIOB.text = "${(iob * 10.0).roundToInt() / 10.0} U"
             }
             .addOnFailureListener { tvIOB.text = "0.0 U" }

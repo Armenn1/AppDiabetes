@@ -64,9 +64,9 @@ class SettingsFragment : Fragment() {
         val SEXO_OPTIONS = listOf("Hombre", "Mujer", "Otro")
         val TIPO_DIABETES_OPTIONS = listOf("Tipo 1", "Tipo 2", "LADA")
         val INSULINA_OPTIONS = listOf(
-            "Novorapid / Humalog (4 h)",
-            "Apidra (4 h)",
-            "Fiasp / Lyumjev (5 h)",
+            "Novorapid / Humalog (5 h, pico 75')",
+            "Apidra (5 h, pico 75')",
+            "Fiasp / Lyumjev (5 h, pico 55')",
             "Personalizada"
         )
         val INSULINA_BASAL_OPTIONS = listOf(
@@ -79,17 +79,21 @@ class SettingsFragment : Fragment() {
             "Otra"
         )
         fun diaDesdeOpcion(opcion: String, valorPersonalizado: String): Double = when (opcion) {
-            INSULINA_OPTIONS[0] -> 4.0
-            INSULINA_OPTIONS[1] -> 4.0
-            INSULINA_OPTIONS[2] -> 5.0
-            else -> valorPersonalizado.toDoubleOrNull() ?: 4.0
+            INSULINA_OPTIONS[0] -> 5.0   // Novorapid/Humalog
+            INSULINA_OPTIONS[1] -> 5.0   // Apidra
+            INSULINA_OPTIONS[2] -> 5.0   // Fiasp/Lyumjev
+            else -> valorPersonalizado.toDoubleOrNull() ?: 5.0
+        }
+        /** τ (tiempo al pico) según tipo de insulina, en minutos. */
+        fun peakDesdeOpcion(opcion: String): Int = when (opcion) {
+            INSULINA_OPTIONS[2] -> 55    // ultra-rápidas
+            else                -> 75    // rápidas estándar
         }
         fun indiceDesdeDia(diaHoras: Double, nombre: String): Int {
             val idx = INSULINA_OPTIONS.indexOfFirst { it == nombre }
             if (idx >= 0) return idx
             return when (diaHoras) {
-                4.0 -> 0
-                5.0 -> 2
+                5.0 -> 0
                 else -> INSULINA_OPTIONS.lastIndex
             }
         }
@@ -203,6 +207,7 @@ class SettingsFragment : Fragment() {
             "libreEmail" to libreEmailText,
             "librePassword" to librePasswordText,
             "diaHoras" to diaDesdeOpcion(insulinaText, etDiaPersonalizado.text.toString()),
+            "insulinaPeakMin" to peakDesdeOpcion(insulinaText),
             "insulinaRapidaNombre" to insulinaText,
             "umbralBajo" to umbralBajo,
             "umbralAlto" to umbralAlto,
@@ -244,7 +249,7 @@ class SettingsFragment : Fragment() {
                 val objetivoMax = document.getDouble("objetivoMax") ?: 180.0
                 val libreEmail = document.getString("libreEmail") ?: ""
                 val librePassword = document.getString("librePassword") ?: ""
-                val diaHoras = document.getDouble("diaHoras") ?: 4.0
+                val diaHoras = document.getDouble("diaHoras") ?: 5.0
                 val umbralBajo = document.getDouble("umbralBajo") ?: 70.0
                 val umbralAlto = document.getDouble("umbralAlto") ?: 180.0
                 val alarmasActivas = document.getBoolean("alarmasActivas") ?: false

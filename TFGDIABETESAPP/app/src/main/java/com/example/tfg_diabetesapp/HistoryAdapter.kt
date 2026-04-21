@@ -222,7 +222,19 @@ class HistoryAdapter(private var items: List<HistoryItem>) :
         h.tvUnidad.text = if (log.gramos > 0) " rac (${log.gramos.toInt()}g)" else " rac"
         h.tvTendencia.visibility = View.GONE
         h.tvDosis.visibility = View.GONE
-        h.tvDetalle.text = if (log.nota.isNotBlank()) log.nota else ""
+
+        val nutri = buildString {
+            if (log.gramos > 0)     append("${log.gramos.toInt()}g CH")
+            if (log.proteinas > 0)  append(" · ${log.proteinas.toInt()}g prot")
+            if (log.grasas > 0)     append(" · ${log.grasas.toInt()}g grasa")
+            if (log.fibra > 0)      append(" · ${log.fibra.toInt()}g fibra")
+        }
+        h.tvDetalle.text = when {
+            nutri.isNotBlank() && log.nota.isNotBlank() -> "${log.nota} — $nutri"
+            nutri.isNotBlank()                          -> nutri
+            log.nota.isNotBlank()                       -> log.nota
+            else                                        -> ""
+        }
     }
 
     // ── DiffUtil ──────────────────────────────────────────────────────────────

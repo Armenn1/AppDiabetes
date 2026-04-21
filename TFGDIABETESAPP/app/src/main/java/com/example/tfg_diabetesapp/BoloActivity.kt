@@ -37,7 +37,8 @@ class BoloActivity : AppCompatActivity() {
     private var mySensibilidad: Double = 0.0
     private var myObjetivoMin: Double = 70.0
     private var myObjetivoMax: Double = 180.0
-    private var myDia: Double = 4.0
+    private var myDia: Double = 5.0
+    private var myPeakMin: Int = 75
 
     // Perfiles horarios del usuario
     private var perfiles: List<PerfilHorario> = emptyList()
@@ -191,7 +192,8 @@ class BoloActivity : AppCompatActivity() {
                 val legacyTarget = document.getDouble("target")
                 val objetivoMin = document.getDouble("objetivoMin") ?: legacyTarget ?: 70.0
                 val objetivoMax = document.getDouble("objetivoMax") ?: 180.0
-                val dia = document.getDouble("diaHoras") ?: 4.0
+                val dia = document.getDouble("diaHoras") ?: 5.0
+                val peak = (document.getLong("insulinaPeakMin") ?: 75L).toInt()
 
                 if (ratio == null || sensi == null) {
                     Toast.makeText(this, "¡Faltan configurar tus Ajustes!", Toast.LENGTH_LONG).show()
@@ -203,6 +205,7 @@ class BoloActivity : AppCompatActivity() {
                 myObjetivoMin = objetivoMin
                 myObjetivoMax = objetivoMax
                 myDia = dia
+                myPeakMin = peak
 
                 @Suppress("UNCHECKED_CAST")
                 val rawPerfiles = document.get("perfilesHorarios") as? List<Map<*, *>> ?: emptyList()
@@ -233,7 +236,7 @@ class BoloActivity : AppCompatActivity() {
                         dosisTotal = doc.getDouble("dosisTotal") ?: 0.0
                     )
                 }
-                currentIob = IobCalculator.calcular(logs, (myDia * 60).toInt())
+                currentIob = IobCalculator.calcular(logs, (myDia * 60).toInt(), myPeakMin)
                 dataLoaded = true
             }
             .addOnFailureListener {

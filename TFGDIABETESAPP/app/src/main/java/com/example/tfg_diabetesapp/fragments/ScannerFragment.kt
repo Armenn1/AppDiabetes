@@ -72,7 +72,8 @@ class ScannerFragment : Fragment() {
     private var tendenciaActual: Int = 0
     private var iobActual: Double = 0.0
     private var cobActual: Double = 0.0
-    private var diaHoras: Double = 4.0
+    private var diaHoras: Double = 5.0
+    private var peakMin: Int = 75
 
     private val auth = FirebaseAuth.getInstance()
     private val db   = FirebaseFirestore.getInstance()
@@ -144,12 +145,16 @@ class ScannerFragment : Fragment() {
         }
 
         btnGuardar.setOnClickListener {
-            resultadoActual?.let { guardarMealScan(it, dosisCalculada = 0.0) }
+            resultadoActual?.let { scan ->
+                guardarMealScan(scan, dosisCalculada = 0.0)
+                guardarComidaEnHistory(scan)
+            }
         }
 
         btnCalcularBolo.setOnClickListener {
             resultadoActual?.let { scan ->
                 guardarMealScan(scan, dosisCalculada = 0.0)
+                guardarComidaEnHistory(scan)
                 val intent = Intent(requireContext(), BoloActivity::class.java).apply {
                     putExtra(BoloActivity.EXTRA_RACIONES, scan.raciones)
                     putExtra("tendencia", tendenciaActual)
@@ -168,7 +173,8 @@ class ScannerFragment : Fragment() {
 
         db.collection("users").document(userId).get()
             .addOnSuccessListener { doc ->
-                diaHoras = doc.getDouble("diaHoras") ?: 4.0
+                diaHoras = doc.getDouble("diaHoras") ?: 5.0
+                peakMin  = (doc.getLong("insulinaPeakMin") ?: 75L).toInt()
 
                 // Última lectura de glucosa
                 db.collection("users").document(userId)
@@ -199,7 +205,7 @@ class ScannerFragment : Fragment() {
                             BoloLog(fecha = d.getLong("fecha") ?: 0L,
                                     dosisTotal = d.getDouble("dosisTotal") ?: 0.0)
                         }
-                        iobActual = IobCalculator.calcular(logs, (diaHoras * 60).toInt())
+                        iobActual = IobCalculator.calcular(logs, (diaHoras * 60).toInt(), peakMin)
                         tvContextIob.text = "${(iobActual * 10).roundToInt() / 10.0} U"
                     }
 
@@ -367,7 +373,8 @@ class ScannerFragment : Fragment() {
         )
         db.collection("users").document(userId)
             .collection("mealScans")
-            .add(data)
+            .document(scan.fecha.toString())
+            .set(data)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Guardado ✓", Toast.LENGTH_SHORT).show()
                 cardResultado.visibility = View.GONE
@@ -382,6 +389,31 @@ class ScannerFragment : Fragment() {
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error al guardar", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    // ── Guardar Comida en history (entrada tipo="Comida") ────────────────────
+    private fun guardarComidaEnHistory(scan: FoodScanResult) {
+        val userId = auth.currentUser?.uid ?: return
+        val mealScanId = scan.fecha.toString()
+        val log = BoloLog(
+            fecha            = scan.fecha,
+            raciones         = scan.raciones,
+            gramos           = scan.carbohidratos,
+            tipo             = "Comida",
+            nota             = scan.comida,
+            tipoComida       = scan.tipoComida,
+            imagenUrl        = scan.imagenUrl,
+            mealScanId       = mealScanId,
+            proteinas        = scan.proteinas,
+            grasas           = scan.grasas,
+            fibra            = scan.fibra,
+            indiceGlucemico  = scan.indiceGlucemico,
+            tendencia        = scan.tendenciaAlEscanear
+        )
+        db.collection("users").document(userId)
+            .collection("history")
+            .document(mealScanId)
+            .set(log)
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
