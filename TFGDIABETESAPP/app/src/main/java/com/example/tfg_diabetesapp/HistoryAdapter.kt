@@ -5,52 +5,165 @@ import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import java.io.File
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class HistoryAdapter(private var lista: List<BoloLog>) :
-    RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+class HistoryAdapter(private var items: List<HistoryItem>) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvFecha: TextView = view.findViewById(R.id.tvFecha)
-        val tvTipoBadge: TextView = view.findViewById(R.id.tvTipoBadge)
-        val tvGlucosa: TextView = view.findViewById(R.id.tvGlucosaItem)
-        val tvUnidadIzq: TextView = view.findViewById(R.id.tvUnidadIzq)
-        val tvDosis: TextView = view.findViewById(R.id.tvDosisItem)
-        val tvDetalle: TextView = view.findViewById(R.id.tvRacionesItem)
+    // ── Modelo de items ──────────────────────────────────────────────────────
+
+    sealed class HistoryItem {
+        data class Header(
+            val fechaTexto: String,
+            val tdd: Double,
+            val numBolos: Int
+        ) : HistoryItem()
+
+        data class Registro(val log: BoloLog) : HistoryItem()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_history, parent, false)
-        return HistoryViewHolder(view)
-    }
+    companion object {
+        const val TYPE_HEADER = 0
+        const val TYPE_ITEM   = 1
 
-    override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        val log = lista[position]
-        val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
-        holder.tvFecha.text = sdf.format(Date(log.fecha))
+        /** Convierte lista plana de logs en lista con headers de día */
+        fun buildItemList(logs: List<BoloLog>): List<HistoryItem> {
+            if (logs.isEmpty()) return emptyList()
+            val sdfKey  = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+            val sdfShow = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+            val cal = Calendar.getInstance()
+            val todayKey = sdfKey.format(cal.time)
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+            val yesterdayKey = sdfKey.format(cal.time)
 
-        when (log.tipo) {
-            "Insulina" -> bindInsulina(holder, log)
-            "Comida"   -> bindComida(holder, log)
-            else       -> bindCalculadora(holder, log)
+            val result  = mutableListOf<HistoryItem>()
+            val porDia  = logs.groupBy { sdfKey.format(Date(it.fecha)) }
+
+            // Firestore ya devuelve ordenado desc, groupBy mantiene el orden
+            porDia.forEach { (key, logsDelDia) ->
+                val fechaTexto = when (key) {
+                    todayKey     -> "Hoy"
+                    yesterdayKey -> "Ayer"
+                    else         -> sdfShow.format(Date(logsDelDia.first().fecha))
+                }
+                val tdd = logsDelDia
+                    .filter { it.tipo == "Calculadora" || it.tipo == "Insulina" }
+                    .sumOf { it.dosisTotal }
+                val bolos = logsDelDia.count { it.tipo == "Calculadora" || it.tipo == "Insulina" }
+                result.add(HistoryItem.Header(fechaTexto, tdd, bolos))
+                logsDelDia.forEach { result.add(HistoryItem.Registro(it)) }
+            }
+            return result
         }
     }
 
-    // ── Calculadora ──────────────────────────────────────────────────────────
-    private fun bindCalculadora(h: HistoryViewHolder, log: BoloLog) {
-        h.tvTipoBadge.visibility = View.GONE
+    // ── ViewHolders ──────────────────────────────────────────────────────────
 
-        // Glucosa coloreada según rango (umbrales estándar, sin acceso al contexto de usuario aquí)
+    class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val tvFecha: TextView = view.findViewById(R.id.tvHeaderFecha)
+        val tvTdd: TextView   = view.findViewById(R.id.tvHeaderTdd)
+    }
+
+    class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val tvFecha:      TextView  = view.findViewById(R.id.tvFecha)
+        val tvBadge:      TextView  = view.findViewById(R.id.tvTipoBadge)
+        val tvGlucosa:    TextView  = view.findViewById(R.id.tvGlucosaItem)
+        val tvUnidad:     TextView  = view.findViewById(R.id.tvUnidadIzq)
+        val tvTendencia:  TextView  = view.findViewById(R.id.tvTendenciaItem)
+        val tvTipoComida: TextView  = view.findViewById(R.id.tvTipoComidaItem)
+        val tvDosis:      TextView  = view.findViewById(R.id.tvDosisItem)
+        val tvDetalle:    TextView  = view.findViewById(R.id.tvRacionesItem)
+        val ivFoto:       ImageView = view.findViewById(R.id.ivFotoComida)
+    }
+
+    // ── Ciclo de vida ────────────────────────────────────────────────────────
+
+    override fun getItemViewType(position: Int) =
+        if (items[position] is HistoryItem.Header) TYPE_HEADER else TYPE_ITEM
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return if (viewType == TYPE_HEADER) {
+            HeaderViewHolder(inflater.inflate(R.layout.item_history_header, parent, false))
+        } else {
+            ItemViewHolder(inflater.inflate(R.layout.item_history, parent, false))
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = items[position]) {
+            is HistoryItem.Header  -> bindHeader(holder as HeaderViewHolder, item)
+            is HistoryItem.Registro -> bindItem(holder as ItemViewHolder, item.log)
+        }
+    }
+
+    override fun getItemCount() = items.size
+
+    fun getItem(position: Int): HistoryItem = items[position]
+
+    // ── Bind header ──────────────────────────────────────────────────────────
+
+    private fun bindHeader(h: HeaderViewHolder, header: HistoryItem.Header) {
+        h.tvFecha.text = header.fechaTexto
+        val tddStr = (Math.round(header.tdd * 10.0) / 10.0).toString()
+        h.tvTdd.text = if (header.numBolos > 0) "TDD: ${tddStr} U · ${header.numBolos} bolo${if (header.numBolos != 1) "s" else ""}" else ""
+    }
+
+    // ── Bind item ────────────────────────────────────────────────────────────
+
+    private fun bindItem(h: ItemViewHolder, log: BoloLog) {
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        h.tvFecha.text = sdf.format(Date(log.fecha))
+
+        // Tipo de comida emoji
+        if (log.tipoComida.isNotEmpty()) {
+            h.tvTipoComida.visibility = View.VISIBLE
+            h.tvTipoComida.text = when (log.tipoComida) {
+                "desayuno" -> "☀️"
+                "comida"   -> "🌤️"
+                "merienda" -> "🍎"
+                "cena"     -> "🌙"
+                else       -> "🍽️"
+            }
+        } else {
+            h.tvTipoComida.visibility = View.GONE
+        }
+
+        // Foto (cache local en filesDir/meal_photos)
+        val file = if (log.imagenUrl.isNotEmpty()) File(log.imagenUrl) else null
+        if (file != null && file.exists()) {
+            h.ivFoto.visibility = View.VISIBLE
+            h.ivFoto.load(file) {
+                crossfade(true)
+                size(120, 120)
+            }
+        } else {
+            h.ivFoto.visibility = View.GONE
+        }
+
+        when (log.tipo) {
+            "Insulina" -> bindInsulina(h, log)
+            "Comida"   -> bindComida(h, log)
+            else       -> bindCalculadora(h, log)
+        }
+    }
+
+    private fun bindCalculadora(h: ItemViewHolder, log: BoloLog) {
+        h.tvBadge.visibility = View.GONE
+
         h.tvGlucosa.visibility = View.VISIBLE
-        h.tvUnidadIzq.visibility = View.VISIBLE
+        h.tvUnidad.visibility  = View.VISIBLE
         h.tvGlucosa.text = log.glucosa.toInt().toString()
-        h.tvUnidadIzq.text = " mg/dL"
+        h.tvUnidad.text  = " mg/dL"
         val glucosaColor = when {
             log.glucosa < 70  -> Color.parseColor("#EF5350")
             log.glucosa > 180 -> Color.parseColor("#FF9800")
@@ -58,85 +171,96 @@ class HistoryAdapter(private var lista: List<BoloLog>) :
         }
         h.tvGlucosa.setTextColor(glucosaColor)
 
-        // Dosis en azul primario
+        // Tendencia
+        if (log.tendencia > 0) {
+            h.tvTendencia.visibility = View.VISIBLE
+            h.tvTendencia.text = when (log.tendencia) {
+                1 -> "↓↓"; 2 -> "↓"; 3 -> "→"; 4 -> "↑"; 5 -> "↑↑"
+                else -> ""
+            }
+            h.tvTendencia.setTextColor(glucosaColor)
+        } else {
+            h.tvTendencia.visibility = View.GONE
+        }
+
         h.tvDosis.visibility = View.VISIBLE
         h.tvDosis.text = "${log.dosisTotal} U"
         h.tvDosis.setTextColor(Color.parseColor("#1976D2"))
 
-        // Desglose
         val detalle = buildString {
             append("${log.raciones} rac")
-            if (log.dosisComida > 0) append(" · Comida: ${log.dosisComida}U")
+            if (log.dosisComida > 0)     append(" · Comida: ${log.dosisComida}U")
             if (log.dosisCorreccion != 0.0) append(" · Corr: ${log.dosisCorreccion}U")
-            if (log.iobDescontado > 0) append(" · IOB: -${log.iobDescontado}U")
+            if (log.iobDescontado > 0)   append(" · IOB: -${log.iobDescontado}U")
         }
         h.tvDetalle.text = detalle
     }
 
-    // ── Insulina manual ──────────────────────────────────────────────────────
-    private fun bindInsulina(h: HistoryViewHolder, log: BoloLog) {
+    private fun bindInsulina(h: ItemViewHolder, log: BoloLog) {
         val purple = Color.parseColor("#9C27B0")
-
-        // Badge
-        h.tvTipoBadge.visibility = View.VISIBLE
-        h.tvTipoBadge.text = "Insulina"
-        h.tvTipoBadge.background = roundedBadge(purple)
-
-        // Sin glucosa
-        h.tvGlucosa.visibility = View.GONE
-        h.tvUnidadIzq.visibility = View.GONE
-
-        // Dosis en morado
+        h.tvBadge.visibility = View.VISIBLE
+        h.tvBadge.text = "Insulina"
+        h.tvBadge.background = roundedBadge(purple)
+        h.tvGlucosa.visibility   = View.GONE
+        h.tvUnidad.visibility    = View.GONE
+        h.tvTendencia.visibility = View.GONE
         h.tvDosis.visibility = View.VISIBLE
         h.tvDosis.text = "${log.dosisTotal} U"
         h.tvDosis.setTextColor(purple)
-
-        // Nota
         h.tvDetalle.text = if (log.nota.isNotBlank()) log.nota else "Inyección manual"
     }
 
-    // ── Comida sin bolo ──────────────────────────────────────────────────────
-    private fun bindComida(h: HistoryViewHolder, log: BoloLog) {
+    private fun bindComida(h: ItemViewHolder, log: BoloLog) {
         val green = Color.parseColor("#4CAF50")
-
-        // Badge
-        h.tvTipoBadge.visibility = View.VISIBLE
-        h.tvTipoBadge.text = "Comida"
-        h.tvTipoBadge.background = roundedBadge(green)
-
-        // Raciones como valor principal izquierda
+        h.tvBadge.visibility = View.VISIBLE
+        h.tvBadge.text = "Comida"
+        h.tvBadge.background = roundedBadge(green)
         h.tvGlucosa.visibility = View.VISIBLE
-        h.tvUnidadIzq.visibility = View.VISIBLE
+        h.tvUnidad.visibility  = View.VISIBLE
         h.tvGlucosa.text = log.raciones.toString()
         h.tvGlucosa.setTextColor(green)
-        h.tvUnidadIzq.text = if (log.gramos > 0) " rac (${log.gramos.toInt()}g)" else " rac"
-
-        // Sin dosis
+        h.tvUnidad.text = if (log.gramos > 0) " rac (${log.gramos.toInt()}g)" else " rac"
+        h.tvTendencia.visibility = View.GONE
         h.tvDosis.visibility = View.GONE
 
-        // Nota
-        h.tvDetalle.text = if (log.nota.isNotBlank()) log.nota else ""
+        val nutri = buildString {
+            if (log.gramos > 0)     append("${log.gramos.toInt()}g CH")
+            if (log.proteinas > 0)  append(" · ${log.proteinas.toInt()}g prot")
+            if (log.grasas > 0)     append(" · ${log.grasas.toInt()}g grasa")
+            if (log.fibra > 0)      append(" · ${log.fibra.toInt()}g fibra")
+        }
+        h.tvDetalle.text = when {
+            nutri.isNotBlank() && log.nota.isNotBlank() -> "${log.nota} — $nutri"
+            nutri.isNotBlank()                          -> nutri
+            log.nota.isNotBlank()                       -> log.nota
+            else                                        -> ""
+        }
     }
 
-    override fun getItemCount() = lista.size
+    // ── DiffUtil ──────────────────────────────────────────────────────────────
 
-    private fun roundedBadge(color: Int): GradientDrawable = GradientDrawable().apply {
+    fun updateLista(nuevosLogs: List<BoloLog>) {
+        val nuevosItems = buildItemList(nuevosLogs)
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = items.size
+            override fun getNewListSize() = nuevosItems.size
+            override fun areItemsTheSame(o: Int, n: Int): Boolean {
+                val old = items[o]; val new = nuevosItems[n]
+                if (old is HistoryItem.Header && new is HistoryItem.Header)
+                    return old.fechaTexto == new.fechaTexto
+                if (old is HistoryItem.Registro && new is HistoryItem.Registro)
+                    return old.log.fecha == new.log.fecha
+                return false
+            }
+            override fun areContentsTheSame(o: Int, n: Int) = items[o] == nuevosItems[n]
+        })
+        items = nuevosItems
+        diff.dispatchUpdatesTo(this)
+    }
+
+    private fun roundedBadge(color: Int) = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
         cornerRadius = 40f
         setColor(color)
-    }
-
-    /** Actualiza la lista con DiffUtil para evitar parpadeos */
-    fun updateLista(nueva: List<BoloLog>) {
-        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize() = lista.size
-            override fun getNewListSize() = nueva.size
-            override fun areItemsTheSame(oldPos: Int, newPos: Int) =
-                lista[oldPos].fecha == nueva[newPos].fecha
-            override fun areContentsTheSame(oldPos: Int, newPos: Int) =
-                lista[oldPos] == nueva[newPos]
-        })
-        lista = nueva
-        diff.dispatchUpdatesTo(this)
     }
 }

@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.BoloLog
+import com.example.tfg_diabetesapp.CarbsCalculator
+import com.example.tfg_diabetesapp.FoodScanResult
 import com.example.tfg_diabetesapp.IobCalculator
 import com.example.tfg_diabetesapp.LoginActivity
 import com.example.tfg_diabetesapp.MainActivity
@@ -69,6 +71,7 @@ class HomeFragment : Fragment() {
     private lateinit var tvGlucosa: TextView
     private lateinit var tvTendencia: TextView
     private lateinit var tvIOB: TextView
+    private lateinit var tvCOB: TextView
     private lateinit var tvLastUpdated: TextView
     private lateinit var homeHeader: MedicalHeaderView
     private lateinit var pbGlucoseLoading: ProgressBar
@@ -76,7 +79,8 @@ class HomeFragment : Fragment() {
 
     private var libreEmail = ""
     private var librePassword = ""
-    private var diaHoras: Double = 4.0
+    private var diaHoras: Double = 5.0
+    private var peakMin: Int = 75
     private var umbralBajo: Float = 70f
     private var umbralAlto: Float = 180f
     private var alarmasActivas: Boolean = false
@@ -102,6 +106,7 @@ class HomeFragment : Fragment() {
         tvGlucosa = view.findViewById(R.id.tvGlucosaMain)
         tvTendencia = view.findViewById(R.id.tvTendencia)
         tvIOB = view.findViewById(R.id.tvIOB)
+        tvCOB = view.findViewById(R.id.tvCOB)
         tvLastUpdated = view.findViewById(R.id.tvLastUpdated)
         pbGlucoseLoading = view.findViewById(R.id.pbGlucoseLoading)
         glucoseChart = view.findViewById(R.id.glucoseChart)
@@ -111,7 +116,9 @@ class HomeFragment : Fragment() {
         setupGlucoseChart()
 
         cardNewBolo.setOnClickListener {
-            startActivity(Intent(requireContext(), BoloActivity::class.java))
+            val intent = Intent(requireContext(), BoloActivity::class.java)
+            intent.putExtra("tendencia", lastKnownReading?.trendArrow ?: 0)
+            startActivity(intent)
         }
 
         homeHeader.setOnLogoutClickListener {
@@ -152,6 +159,28 @@ class HomeFragment : Fragment() {
         super.onResume()
         loadUserSettings()
         refreshIobData()
+        refreshCobData()
+    }
+
+    private fun refreshCobData() {
+        val userId = auth.currentUser?.uid ?: return
+        val cutoffCob = System.currentTimeMillis() - (270 * 60_000L)
+        db.collection("users").document(userId)
+            .collection("mealScans")
+            .whereGreaterThan("fecha", cutoffCob)
+            .get()
+            .addOnSuccessListener { docs ->
+                val scans = docs.map { d ->
+                    FoodScanResult(
+                        fecha = d.getLong("fecha") ?: 0L,
+                        carbohidratosNetos = d.getDouble("carbohidratosNetos") ?: 0.0,
+                        grasas = d.getDouble("grasas") ?: 0.0
+                    )
+                }
+                val cob = CarbsCalculator.calcular(scans)
+                tvCOB.text = "${(cob * 10).roundToInt() / 10.0} g"
+            }
+            .addOnFailureListener { tvCOB.text = "0 g" }
     }
 
     // ── Saludo dinámico ──────────────────────────────────────────────────────
@@ -172,7 +201,8 @@ class HomeFragment : Fragment() {
             .addOnSuccessListener { document ->
                 val newEmail = document.getString("libreEmail") ?: ""
                 val newPassword = document.getString("librePassword") ?: ""
-                diaHoras = document.getDouble("diaHoras") ?: 4.0
+                diaHoras = document.getDouble("diaHoras") ?: 5.0
+                peakMin  = (document.getLong("insulinaPeakMin") ?: 75L).toInt()
 
                 val newUmbralBajo = (document.getDouble("umbralBajo") ?: 70.0).toFloat()
                 val newUmbralAlto = (document.getDouble("umbralAlto") ?: 180.0).toFloat()
@@ -277,13 +307,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun trendArrowText(trend: Int): String = when (trend) {
-        0 -> "↓↓"
-        1 -> "↓"
-        2 -> "↘"
+        1 -> "↓↓"
+        2 -> "↓"
         3 -> "→"
-        4 -> "↗"
-        5 -> "↑"
-        6 -> "↑↑"
+        4 -> "↑"
+        5 -> "↑↑"
         else -> ""
     }
 
@@ -293,8 +321,49 @@ class HomeFragment : Fragment() {
             LibreLinkUpRepository.getGlucoseData(libreEmail, librePassword)
         }
         withContext(Dispatchers.Main) {
-            if (result != null) updateGlucoseChart(result.graphMeasurements)
+            if (result != null) {
+                updateGlucoseChart(result.graphMeasurements)
+                saveGlucoseChartToFirestore(result.graphMeasurements)
+            }
         }
+    }
+
+    private fun saveGlucoseChartToFirestore(measurements: List<GlucoseMeasurement>) {
+        val userId = auth.currentUser?.uid ?: return
+        if (measurements.isEmpty()) return
+
+        val colRef = db.collection("users").document(userId).collection("glucoseReadings")
+        val batch = db.batch()
+        var count = 0
+
+        val parsers = listOf(
+            SimpleDateFormat("M/d/yyyy h:mm:ss a", Locale.US),
+            SimpleDateFormat("M/d/yyyy H:mm:ss", Locale.US),
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US),
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        )
+
+        for (m in measurements) {
+            var fecha: Long? = null
+            for (p in parsers) {
+                try { fecha = p.parse(m.timestamp)?.time; if (fecha != null) break }
+                catch (_: Exception) {}
+            }
+            if (fecha == null) continue
+
+            val data = mapOf(
+                "fecha"     to fecha,
+                "valor"     to m.value,
+                "tendencia" to m.trendArrow,
+                "fuente"    to "LibreLinkUp"
+            )
+            // Usar el timestamp como ID — idempotente, no duplica si se llama varias veces
+            batch.set(colRef.document(fecha.toString()), data)
+            count++
+            if (count == 500) break   // límite de Firestore batch
+        }
+
+        if (count > 0) batch.commit()
     }
 
     // ── Gráfica ──────────────────────────────────────────────────────────────
@@ -399,7 +468,7 @@ class HomeFragment : Fragment() {
                 val logs = documents.map { doc ->
                     BoloLog(fecha = doc.getLong("fecha") ?: 0L, dosisTotal = doc.getDouble("dosisTotal") ?: 0.0)
                 }
-                val iob = IobCalculator.calcular(logs, (diaHoras * 60).toInt())
+                val iob = IobCalculator.calcular(logs, (diaHoras * 60).toInt(), peakMin)
                 tvIOB.text = "${(iob * 10.0).roundToInt() / 10.0} U"
             }
             .addOnFailureListener { tvIOB.text = "0.0 U" }

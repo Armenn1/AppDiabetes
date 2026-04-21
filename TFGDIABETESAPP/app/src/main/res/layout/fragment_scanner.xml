@@ -27,7 +27,102 @@
             android:paddingTop="@dimen/content_gap_after_header"
             android:paddingBottom="@dimen/space_3xl">
 
-            <!-- Image card -->
+            <!-- CARD 1: Contexto actual -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_lg">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_lg">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Estado actual"
+                        android:textAppearance="@style/TextAppearance.App.SectionTitle"
+                        android:layout_marginBottom="@dimen/space_sm" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Glucosa"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+
+                            <TextView
+                                android:id="@+id/tvContextGlucosa"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="-- mg/dL"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_text_primary" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="IOB"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+
+                            <TextView
+                                android:id="@+id/tvContextIob"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="-- U"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_primary" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="COB"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+
+                            <TextView
+                                android:id="@+id/tvContextCob"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="-- g"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_secondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- CARD 2: Imagen del plato -->
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
@@ -80,7 +175,7 @@
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Buttons -->
+            <!-- Botones de cámara -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -108,7 +203,7 @@
                     app:backgroundTint="@color/color_secondary" />
             </LinearLayout>
 
-            <!-- Loading state -->
+            <!-- Loading -->
             <LinearLayout
                 android:id="@+id/layoutLoading"
                 android:layout_width="match_parent"
@@ -136,52 +231,264 @@
                     android:layout_marginStart="@dimen/space_md" />
             </LinearLayout>
 
-            <!-- Result card -->
+            <!-- CARD 3: Resultado nutricional -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardResultado"
                 style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/space_lg">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@color/color_primary_light"
-                        android:padding="@dimen/space_lg"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🧠"
-                            android:textSize="20sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Resultado del análisis"
-                            android:textAppearance="@style/TextAppearance.App.SectionTitle"
-                            android:textColor="@color/color_primary"
-                            android:textSize="15sp"
-                            android:layout_marginStart="@dimen/space_md" />
-                    </LinearLayout>
+                    android:padding="@dimen/space_lg">
 
                     <TextView
-                        android:id="@+id/tvAiResult"
+                        android:id="@+id/tvNombreComida"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Plato"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/color_text_primary"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/tvConfianza"
+                        app:layout_constraintHorizontal_bias="0" />
+
+                    <TextView
+                        android:id="@+id/tvConfianza"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Media"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/color_on_primary"
+                        android:paddingHorizontal="@dimen/space_sm"
+                        android:paddingVertical="2dp"
+                        android:background="#FF9800"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvDescripcionComida"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textAppearance="@style/TextAppearance.App.Caption"
+                        android:layout_marginTop="@dimen/space_xs"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvNombreComida"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <View
+                        android:id="@+id/dividerResultado"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/color_divider"
+                        android:layout_marginTop="@dimen/space_md"
+                        app:layout_constraintTop_toBottomOf="@id/tvDescripcionComida" />
+
+                    <!-- Fila 1 del grid -->
+                    <LinearLayout
+                        android:id="@+id/gridMetricasRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Captura tu plato y pulsa Analizar IA para obtener los gramos de hidratos de carbono y el número de raciones."
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:lineSpacingExtra="6dp"
-                        android:padding="@dimen/card_padding" />
-                </LinearLayout>
+                        android:orientation="horizontal"
+                        android:baselineAligned="false"
+                        android:layout_marginTop="@dimen/space_md"
+                        app:layout_constraintTop_toBottomOf="@id/dividerResultado"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/space_sm">
+
+                            <TextView
+                                android:id="@+id/tvCarbohidratos"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 g"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_primary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Carbohidratos"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/space_sm">
+
+                            <TextView
+                                android:id="@+id/tvFibra"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 g"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_primary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Fibra"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/space_sm">
+
+                            <TextView
+                                android:id="@+id/tvProteinas"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 g"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_primary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Proteínas"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Fila 2 del grid -->
+                    <LinearLayout
+                        android:id="@+id/gridMetricasRow2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false"
+                        app:layout_constraintTop_toBottomOf="@id/gridMetricasRow1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/space_sm">
+
+                            <TextView
+                                android:id="@+id/tvGrasas"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 g"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_primary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Grasas"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/space_sm">
+
+                            <TextView
+                                android:id="@+id/tvRaciones"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 rac"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_primary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Raciones"
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/space_sm">
+
+                            <TextView
+                                android:id="@+id/tvIndiceGlucemico"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/color_primary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Índice Gluc."
+                                android:textAppearance="@style/TextAppearance.App.Caption" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Botones de acción -->
+            <LinearLayout
+                android:id="@+id/layoutBotonesAccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGuardar"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/space_sm"
+                    android:text="Guardar" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCalcularBolo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:text="Calcular bolo →"
+                    app:backgroundTint="@color/color_secondary" />
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -21,6 +21,11 @@ import kotlin.math.roundToInt
 
 class BoloActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_RACIONES = "raciones"
+        const val EXTRA_IMAGEN_URL = "imagenUrl"
+    }
+
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -32,7 +37,8 @@ class BoloActivity : AppCompatActivity() {
     private var mySensibilidad: Double = 0.0
     private var myObjetivoMin: Double = 70.0
     private var myObjetivoMax: Double = 180.0
-    private var myDia: Double = 4.0
+    private var myDia: Double = 5.0
+    private var myPeakMin: Int = 75
 
     // Perfiles horarios del usuario
     private var perfiles: List<PerfilHorario> = emptyList()
@@ -41,6 +47,9 @@ class BoloActivity : AppCompatActivity() {
     private var currentIob: Double = 0.0
 
     private var dataLoaded = false
+
+    private var tendenciaExtra: Int = 0
+    private var imagenUrlExtra: String = ""
 
     // ── Ratio y sensibilidad efectivos (perfil activo o globales) ────────────
     private val effectiveRatio get() = PerfilHorario.getActivo(perfiles)?.factorHC ?: myRatio
@@ -56,11 +65,18 @@ class BoloActivity : AppCompatActivity() {
         }
         setContentView(R.layout.activity_bolo)
 
+        tendenciaExtra = intent.getIntExtra("tendencia", 0)
+        imagenUrlExtra = intent.getStringExtra(EXTRA_IMAGEN_URL) ?: ""
+        val racionesExtra = intent.getDoubleExtra(EXTRA_RACIONES, -1.0)
+
         MobileAds.initialize(this)
         loadInterstitialAd()
 
         val etGlucosa = findViewById<EditText>(R.id.etGlucosaActual)
         val etRaciones = findViewById<EditText>(R.id.etRaciones)
+        if (racionesExtra > 0) {
+            etRaciones.setText(racionesExtra.toString())
+        }
         val btnCalcular = findViewById<MaterialButton>(R.id.btnCalcular)
         val boloHeader = findViewById<MedicalHeaderView>(R.id.boloHeader)
         val cardResult = findViewById<MaterialCardView>(R.id.cardResult)
@@ -176,7 +192,8 @@ class BoloActivity : AppCompatActivity() {
                 val legacyTarget = document.getDouble("target")
                 val objetivoMin = document.getDouble("objetivoMin") ?: legacyTarget ?: 70.0
                 val objetivoMax = document.getDouble("objetivoMax") ?: 180.0
-                val dia = document.getDouble("diaHoras") ?: 4.0
+                val dia = document.getDouble("diaHoras") ?: 5.0
+                val peak = (document.getLong("insulinaPeakMin") ?: 75L).toInt()
 
                 if (ratio == null || sensi == null) {
                     Toast.makeText(this, "¡Faltan configurar tus Ajustes!", Toast.LENGTH_LONG).show()
@@ -188,6 +205,7 @@ class BoloActivity : AppCompatActivity() {
                 myObjetivoMin = objetivoMin
                 myObjetivoMax = objetivoMax
                 myDia = dia
+                myPeakMin = peak
 
                 @Suppress("UNCHECKED_CAST")
                 val rawPerfiles = document.get("perfilesHorarios") as? List<Map<*, *>> ?: emptyList()
@@ -218,7 +236,7 @@ class BoloActivity : AppCompatActivity() {
                         dosisTotal = doc.getDouble("dosisTotal") ?: 0.0
                     )
                 }
-                currentIob = IobCalculator.calcular(logs, (myDia * 60).toInt())
+                currentIob = IobCalculator.calcular(logs, (myDia * 60).toInt(), myPeakMin)
                 dataLoaded = true
             }
             .addOnFailureListener {
@@ -273,8 +291,23 @@ class BoloActivity : AppCompatActivity() {
             dosisTotal = total,
             iobDescontado = iobDescontado,
             fecha = System.currentTimeMillis(),
-            tipo = tipo
+            tipo = tipo,
+            tendencia = tendenciaExtra,
+            tipoComida = inferirTipoComida(),
+            perfilHoraInicio = PerfilHorario.getActivo(perfiles)?.horaInicio,
+            imagenUrl = imagenUrlExtra
         )
         db.collection("users").document(userId).collection("history").add(nuevoLog)
+    }
+
+    private fun inferirTipoComida(): String {
+        val hora = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return when (hora) {
+            in 6..10  -> "desayuno"
+            in 11..15 -> "comida"
+            in 16..19 -> "merienda"
+            in 20..23 -> "cena"
+            else      -> "snack"
+        }
     }
 }
