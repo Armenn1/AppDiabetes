@@ -350,41 +350,74 @@ class ScannerFragment : Fragment() {
     // ── Guardar en Firestore ──────────────────────────────────────────────────
     private fun guardarMealScan(scan: FoodScanResult, dosisCalculada: Double) {
         val userId = auth.currentUser?.uid ?: return
-        val data = hashMapOf(
-            "fecha"              to scan.fecha,
-            "comida"             to scan.comida,
-            "descripcion"        to scan.descripcion,
-            "carbohidratos"      to scan.carbohidratos,
-            "fibra"              to scan.fibra,
-            "proteinas"          to scan.proteinas,
-            "grasas"             to scan.grasas,
-            "carbohidratosNetos" to scan.carbohidratosNetos,
-            "indiceGlucemico"    to scan.indiceGlucemico,
-            "cargaGlucemica"     to scan.cargaGlucemica,
-            "raciones"           to scan.raciones,
-            "confianza"          to scan.confianza,
-            "glucosaAlEscanear"  to scan.glucosaAlEscanear,
-            "tendenciaAlEscanear" to scan.tendenciaAlEscanear,
-            "iobAlEscanear"      to scan.iobAlEscanear,
-            "cobAlEscanear"      to scan.cobAlEscanear,
-            "dosisCalculada"     to dosisCalculada,
-            "tipoComida"         to scan.tipoComida,
-            "imagenUrl"          to scan.imagenUrl
-        )
+        val ahora = System.currentTimeMillis()
+        val cutoff48h = ahora - 48 * 3_600_000L
+
         db.collection("users").document(userId)
-            .collection("mealScans")
-            .document(scan.fecha.toString())
-            .set(data)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Guardado ✓", Toast.LENGTH_SHORT).show()
-                cardResultado.visibility = View.GONE
-                layoutBotonesAccion.visibility = View.GONE
-                resultadoActual = null
-                imageBitmap = null
-                ivFoodPhoto.visibility = View.GONE
-                layoutPlaceholder.visibility = View.VISIBLE
-                btnAnalyze.isEnabled = false
-                cargarContexto()   // refrescar COB tras guardar
+            .collection("activityLogs")
+            .orderBy("fecha", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { activityDocs ->
+                val activityDoc = activityDocs.documents.firstOrNull()
+                val actFecha = activityDoc?.getLong("fecha") ?: 0L
+                val actividadRecenteId: String
+                val minutosDesdeActividad: Long
+                val efectoResidualHoras: Double
+
+                if (activityDoc != null && actFecha > cutoff48h) {
+                    actividadRecenteId = activityDoc.id
+                    minutosDesdeActividad = (ahora - actFecha) / 60_000L
+                    efectoResidualHoras = activityDoc.getDouble("efectoResidualHoras") ?: 0.0
+                } else {
+                    actividadRecenteId = ""
+                    minutosDesdeActividad = -1L
+                    efectoResidualHoras = 0.0
+                }
+
+                val data = hashMapOf(
+                    "fecha"                to scan.fecha,
+                    "comida"               to scan.comida,
+                    "descripcion"          to scan.descripcion,
+                    "carbohidratos"        to scan.carbohidratos,
+                    "fibra"                to scan.fibra,
+                    "proteinas"            to scan.proteinas,
+                    "grasas"               to scan.grasas,
+                    "carbohidratosNetos"   to scan.carbohidratosNetos,
+                    "indiceGlucemico"      to scan.indiceGlucemico,
+                    "cargaGlucemica"       to scan.cargaGlucemica,
+                    "raciones"             to scan.raciones,
+                    "confianza"            to scan.confianza,
+                    "glucosaAlEscanear"    to scan.glucosaAlEscanear,
+                    "tendenciaAlEscanear"  to scan.tendenciaAlEscanear,
+                    "iobAlEscanear"        to scan.iobAlEscanear,
+                    "cobAlEscanear"        to scan.cobAlEscanear,
+                    "dosisCalculada"       to dosisCalculada,
+                    "tipoComida"           to scan.tipoComida,
+                    "imagenUrl"            to scan.imagenUrl,
+                    "actividadRecenteId"   to actividadRecenteId,
+                    "minutosDesdeActividad" to minutosDesdeActividad,
+                    "efectoResidualHoras"  to efectoResidualHoras
+                )
+
+                db.collection("users").document(userId)
+                    .collection("mealScans")
+                    .document(scan.fecha.toString())
+                    .set(data)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Guardado ✓", Toast.LENGTH_SHORT).show()
+                        cardResultado.visibility = View.GONE
+                        layoutBotonesAccion.visibility = View.GONE
+                        resultadoActual = null
+                        imageBitmap = null
+                        ivFoodPhoto.visibility = View.GONE
+                        layoutPlaceholder.visibility = View.VISIBLE
+                        btnAnalyze.isEnabled = false
+                        cargarContexto()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Error al guardar", Toast.LENGTH_SHORT).show()
+                    }
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error al guardar", Toast.LENGTH_SHORT).show()

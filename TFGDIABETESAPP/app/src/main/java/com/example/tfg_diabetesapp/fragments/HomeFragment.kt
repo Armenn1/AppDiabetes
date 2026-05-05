@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.tfg_diabetesapp.ActivityLogActivity
 import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.BoloLog
 import com.example.tfg_diabetesapp.CarbsCalculator
@@ -103,6 +104,7 @@ class HomeFragment : Fragment() {
 
         homeHeader = view.findViewById(R.id.homeHeader)
         val cardNewBolo = view.findViewById<MaterialCardView>(R.id.cardNewBolo)
+        val cardNewActivity = view.findViewById<MaterialCardView>(R.id.cardNewActivity)
         tvGlucosa = view.findViewById(R.id.tvGlucosaMain)
         tvTendencia = view.findViewById(R.id.tvTendencia)
         tvIOB = view.findViewById(R.id.tvIOB)
@@ -119,6 +121,10 @@ class HomeFragment : Fragment() {
             val intent = Intent(requireContext(), BoloActivity::class.java)
             intent.putExtra("tendencia", lastKnownReading?.trendArrow ?: 0)
             startActivity(intent)
+        }
+
+        cardNewActivity.setOnClickListener {
+            startActivity(Intent(requireContext(), ActivityLogActivity::class.java))
         }
 
         homeHeader.setOnLogoutClickListener {
