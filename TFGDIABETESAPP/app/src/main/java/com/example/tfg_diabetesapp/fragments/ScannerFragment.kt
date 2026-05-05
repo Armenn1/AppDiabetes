@@ -265,7 +265,7 @@ class ScannerFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val model = GenerativeModel(
-                    modelName = "gemini-1.5-flash",
+                    modelName = "gemini-2.5-flash",
                     apiKey = BuildConfig.GEMINI_API_KEY
                 )
                 val response = model.generateContent(content {
