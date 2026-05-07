@@ -8,6 +8,7 @@ import com.example.tfg_diabetesapp.fragments.HistoryFragment
 import com.example.tfg_diabetesapp.fragments.HomeFragment
 import com.example.tfg_diabetesapp.fragments.ScannerFragment
 import com.example.tfg_diabetesapp.fragments.SettingsFragment
+import com.example.tfg_diabetesapp.glucose.GlucoseSyncWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -22,6 +23,8 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             replaceFragment(HomeFragment())
         }
+
+        GlucoseSyncWorker.schedule(applicationContext)
 
         // 2. Escuchar los clicks en el menú de abajo
         bottomNav.setOnItemSelectedListener { item ->

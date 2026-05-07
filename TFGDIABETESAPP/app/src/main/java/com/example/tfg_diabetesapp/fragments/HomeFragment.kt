@@ -31,6 +31,7 @@ import com.example.tfg_diabetesapp.MainActivity
 import com.example.tfg_diabetesapp.PerfilHorario
 import com.example.tfg_diabetesapp.R
 import com.example.tfg_diabetesapp.glucose.GlucoseMeasurement
+import com.example.tfg_diabetesapp.glucose.GlucoseSyncWorker
 import com.example.tfg_diabetesapp.glucose.LibreLinkUpRepository
 import com.google.firebase.firestore.SetOptions
 import com.example.tfg_diabetesapp.widgets.MedicalHeaderView
