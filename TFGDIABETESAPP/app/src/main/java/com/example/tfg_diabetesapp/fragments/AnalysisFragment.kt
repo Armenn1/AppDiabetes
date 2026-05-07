@@ -38,8 +38,8 @@ class AnalysisFragment : Fragment() {
     private lateinit var tvGmi: TextView
     private lateinit var tvGmiVsObjetivo: TextView
 
-    private var objetivoMin: Double = 70.0
-    private var objetivoMax: Double = 180.0
+    private var rangoMin: Double = 70.0
+    private var rangoMax: Double = 180.0
     private var objetivoHbA1c: Double? = null
 
     private var diasSeleccionados: Int = 7
@@ -87,8 +87,8 @@ class AnalysisFragment : Fragment() {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users").document(userId).get()
             .addOnSuccessListener { doc ->
-                objetivoMin = doc.getDouble("objetivoMin") ?: 70.0
-                objetivoMax = doc.getDouble("objetivoMax") ?: 180.0
+                rangoMin = doc.getDouble("umbralBajo") ?: 70.0
+                rangoMax = doc.getDouble("umbralAlto") ?: 180.0
                 objetivoHbA1c = doc.getDouble("objetivoHbA1c")
                 cargarLecturas()
             }
@@ -104,11 +104,11 @@ class AnalysisFragment : Fragment() {
             .get()
             .addOnSuccessListener { docs ->
                 val valores = docs.mapNotNull { it.getLong("valor")?.toInt() }
-                val stats = GlucoseStatsCalculator.calcular(valores, objetivoMin, objetivoMax)
+                val stats = GlucoseStatsCalculator.calcular(valores, rangoMin, rangoMax)
                 renderStats(stats)
             }
             .addOnFailureListener {
-                renderStats(GlucoseStatsCalculator.calcular(emptyList(), objetivoMin, objetivoMax))
+                renderStats(GlucoseStatsCalculator.calcular(emptyList(), rangoMin, rangoMax))
             }
     }
 
