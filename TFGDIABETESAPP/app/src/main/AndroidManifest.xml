@@ -46,6 +46,9 @@
             android:name=".BoloActivity"
             android:exported="false" />
         <activity
+            android:name=".ActivityLogActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
