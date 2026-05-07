@@ -16,9 +16,9 @@
         android:title="Escáner" />
 
     <item
-        android:id="@+id/nav_news"
-        android:icon="@drawable/ic_nav_learn"
-        android:title="Aprende" />
+        android:id="@+id/nav_analysis"
+        android:icon="@drawable/ic_nav_history"
+        android:title="Análisis" />
 
     <item
         android:id="@+id/nav_settings"
