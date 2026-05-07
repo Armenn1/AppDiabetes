@@ -133,6 +133,7 @@ class HomeFragment : Fragment() {
                 .setTitle("Cerrar sesión")
                 .setMessage("¿Seguro que quieres cerrar sesión?")
                 .setPositiveButton("Cerrar sesión") { _, _ ->
+                    GlucoseSyncWorker.cancel(requireContext().applicationContext)
                     auth.signOut()
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
