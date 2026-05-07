@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
                     replaceFragment(ScannerFragment())
                     true
                 }
-                R.id.nav_news -> {
-                    replaceFragment(NewsFragment())
+                R.id.nav_analysis -> {
+                    replaceFragment(AnalysisFragment())
                     true
                 }
                 R.id.nav_settings -> {
