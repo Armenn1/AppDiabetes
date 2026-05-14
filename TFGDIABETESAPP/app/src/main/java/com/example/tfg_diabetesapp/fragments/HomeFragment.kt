@@ -88,6 +88,12 @@ class HomeFragment : Fragment() {
     private var alarmasActivas: Boolean = false
     private var perfiles: List<PerfilHorario> = emptyList()
 
+    private var iobActual: Double = 0.0
+    private var cobActual: Double = 0.0
+    private var sensibilidad: Double = 0.0
+    private var factorHC: Double = 0.0
+    private var grasasUltimaComida: Double = 0.0
+
     private var lastKnownReading: GlucoseMeasurement? = null
 
     private val notifPermissionLauncher = registerForActivityResult(
@@ -211,6 +217,8 @@ class HomeFragment : Fragment() {
                 val newPassword = document.getString("librePassword") ?: ""
                 diaHoras = document.getDouble("diaHoras") ?: 5.0
                 peakMin  = (document.getLong("insulinaPeakMin") ?: 75L).toInt()
+                sensibilidad = document.getDouble("sensibilidad") ?: 0.0
+                factorHC     = document.getDouble("factorHC")     ?: 0.0
 
                 val newUmbralBajo = (document.getDouble("umbralBajo") ?: 70.0).toFloat()
                 val newUmbralAlto = (document.getDouble("umbralAlto") ?: 180.0).toFloat()
