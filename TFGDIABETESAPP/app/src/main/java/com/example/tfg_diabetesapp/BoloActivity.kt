@@ -169,6 +169,9 @@ class BoloActivity : AppCompatActivity() {
             cardResult.visibility = View.VISIBLE
 
             saveLogToFirebase(glucosa, raciones, comidaRed, correccionRed, totalRed, iobRed)
+            if (racionesExtra <= 0 && raciones > 0) {
+                guardarMealScanManual(raciones)
+            }
             showInterstitialAd()
         }
 
@@ -298,6 +301,17 @@ class BoloActivity : AppCompatActivity() {
             imagenUrl = imagenUrlExtra
         )
         db.collection("users").document(userId).collection("history").add(nuevoLog)
+    }
+
+    private fun guardarMealScanManual(raciones: Double) {
+        val userId = auth.currentUser?.uid ?: return
+        val data = mapOf(
+            "fecha" to System.currentTimeMillis(),
+            "carbohidratosNetos" to raciones * 10.0,
+            "grasas" to 0.0,
+            "fuente" to "manual"
+        )
+        db.collection("users").document(userId).collection("mealScans").add(data)
     }
 
     private fun inferirTipoComida(): String {

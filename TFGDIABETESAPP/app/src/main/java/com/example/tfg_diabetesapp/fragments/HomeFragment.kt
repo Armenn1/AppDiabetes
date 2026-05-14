@@ -25,6 +25,7 @@ import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.BoloLog
 import com.example.tfg_diabetesapp.CarbsCalculator
 import com.example.tfg_diabetesapp.FoodScanResult
+import com.example.tfg_diabetesapp.GlucosePredictionModel
 import com.example.tfg_diabetesapp.IobCalculator
 import com.example.tfg_diabetesapp.LoginActivity
 import com.example.tfg_diabetesapp.MainActivity
@@ -192,9 +193,64 @@ class HomeFragment : Fragment() {
                     )
                 }
                 val cob = CarbsCalculator.calcular(scans)
+                cobActual = cob
+                grasasUltimaComida = scans.maxByOrNull { it.fecha }?.grasas ?: 0.0
                 tvCOB.text = "${(cob * 10).roundToInt() / 10.0} g"
+                intentarMostrarPrediccion()
             }
             .addOnFailureListener { tvCOB.text = "0 g" }
+    }
+
+    private fun intentarMostrarPrediccion() {
+        if (sensibilidad <= 0 || factorHC <= 0) return
+        if (iobActual <= 0 && cobActual <= 0) return
+        val ultima = lastKnownReading ?: return
+
+        val prediccion = GlucosePredictionModel.predecir(
+            glucosaActual       = ultima.value.toDouble(),
+            iobActual           = iobActual,
+            cobGramos           = cobActual,
+            grasasUltimaComida  = grasasUltimaComida,
+            sensibilidad        = sensibilidad,
+            factorHC            = factorHC,
+            diaMinutos          = (diaHoras * 60).toInt(),
+            minutosMax          = 180
+        )
+
+        agregarPrediccionAGrafica(prediccion)
+    }
+
+    private fun agregarPrediccionAGrafica(prediccion: List<Pair<Int, Double>>) {
+        val ahoraMin = System.currentTimeMillis() / 60_000L
+        val entries = prediccion.map { (deltaMin, glucosa) ->
+            Entry((ahoraMin + deltaMin).toFloat(), glucosa.toFloat())
+        }
+
+        val predDataSet = LineDataSet(entries, "Predicción").apply {
+            color = Color.parseColor("#FF9800")
+            lineWidth = 2f
+            setDrawCircles(false)
+            setDrawValues(false)
+            enableDashedLine(15f, 8f, 0f)
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            cubicIntensity = 0.15f
+            setDrawFilled(false)
+        }
+
+        val currentData = glucoseChart.data
+        if (currentData != null) {
+            val existing = currentData.dataSets.find { it.label == "Predicción" }
+            if (existing != null) currentData.removeDataSet(existing)
+            currentData.addDataSet(predDataSet)
+            currentData.notifyDataChanged()
+            glucoseChart.notifyDataSetChanged()
+        } else {
+            glucoseChart.data = LineData(predDataSet)
+        }
+
+        glucoseChart.legend.isEnabled = true
+        glucoseChart.legend.textSize = 11f
+        glucoseChart.invalidate()
     }
 
     // ── Saludo dinámico ──────────────────────────────────────────────────────
@@ -284,6 +340,7 @@ class HomeFragment : Fragment() {
                 tvLastUpdated.text = "Última act. $hora"
                 checkGlucoseAlert(measurement.value)
                 saveGlucoseReading(measurement)
+                intentarMostrarPrediccion()
             } else if (lastKnownReading != null) {
                 tvGlucosa.alpha = 0.55f
                 updateGlucoseCard(lastKnownReading!!.value.toDouble(), lastKnownReading!!.trendArrow, stale = true)
@@ -471,6 +528,7 @@ class HomeFragment : Fragment() {
         }
         glucoseChart.data = LineData(dataSet)
         glucoseChart.invalidate()
+        intentarMostrarPrediccion()
     }
 
     // ── IOB ──────────────────────────────────────────────────────────────────
@@ -485,7 +543,9 @@ class HomeFragment : Fragment() {
                     BoloLog(fecha = doc.getLong("fecha") ?: 0L, dosisTotal = doc.getDouble("dosisTotal") ?: 0.0)
                 }
                 val iob = IobCalculator.calcular(logs, (diaHoras * 60).toInt(), peakMin)
+                iobActual = iob
                 tvIOB.text = "${(iob * 10.0).roundToInt() / 10.0} U"
+                intentarMostrarPrediccion()
             }
             .addOnFailureListener { tvIOB.text = "0.0 U" }
     }
