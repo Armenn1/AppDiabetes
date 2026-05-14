@@ -60,6 +60,8 @@ dependencies {
     implementation("io.coil-kt:coil:2.6.0")
     implementation("androidx.fragment:fragment-ktx:1.8.9")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-analytics")

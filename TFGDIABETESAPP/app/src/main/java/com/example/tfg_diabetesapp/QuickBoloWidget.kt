@@ -29,7 +29,7 @@ internal fun updateAppWidget(
     // Preparamos la ruta hacia tu BoloActivity
     val intent = Intent(context, BoloActivity::class.java)
 
-    // 🚨 LA LÍNEA MÁGICA: Obligamos a Android a abrirla como una pantalla nueva sí o sí
+    // obligamos a Android a abrirla como una pantalla nueva sí o sí
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
 
     val pendingIntent = PendingIntent.getActivity(
