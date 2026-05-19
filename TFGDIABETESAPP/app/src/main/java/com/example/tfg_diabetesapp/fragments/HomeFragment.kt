@@ -47,6 +47,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -124,6 +125,7 @@ class HomeFragment : Fragment() {
         setGreeting()
         createNotificationChannel()
         setupGlucoseChart()
+        loadGlucoseCacheFromFirestore()
 
         cardNewBolo.setOnClickListener {
             val intent = Intent(requireContext(), BoloActivity::class.java)
@@ -344,12 +346,13 @@ class HomeFragment : Fragment() {
             } else if (lastKnownReading != null) {
                 tvGlucosa.alpha = 0.55f
                 updateGlucoseCard(lastKnownReading!!.value.toDouble(), lastKnownReading!!.trendArrow, stale = true)
-                tvLastUpdated.text = "Sin conexión · dato anterior"
+                tvLastUpdated.text = "Sin conexión · ${formatStaleLabel(lastKnownReading!!)}"
             } else {
                 tvGlucosa.text = "--"
                 tvTendencia.text = ""
                 tvGlucosa.alpha = 1f
                 tvLastUpdated.text = "Sin conexión"
+                loadGlucoseCacheFromFirestore()
             }
         }
     }
@@ -437,6 +440,69 @@ class HomeFragment : Fragment() {
         }
 
         if (count > 0) batch.commit()
+    }
+
+    // ── Caché local (Firestore) ──────────────────────────────────────────────
+
+    private fun loadGlucoseCacheFromFirestore() {
+        val userId = auth.currentUser?.uid ?: return
+        val since = System.currentTimeMillis() - 24 * 3_600_000L
+        db.collection("users").document(userId).collection("glucoseReadings")
+            .whereGreaterThan("fecha", since)
+            .orderBy("fecha", Query.Direction.ASCENDING)
+            .limit(500)
+            .get()
+            .addOnSuccessListener { docs ->
+                if (docs.isEmpty) return@addOnSuccessListener
+                val readings = docs.mapNotNull { d ->
+                    val fecha = d.getLong("fecha") ?: return@mapNotNull null
+                    val valor = (d.getLong("valor") ?: d.getDouble("valor")?.toLong())?.toInt()
+                        ?: return@mapNotNull null
+                    val trend = (d.getLong("tendencia") ?: 0L).toInt()
+                    Triple(fecha, valor, trend)
+                }
+                if (readings.isEmpty()) return@addOnSuccessListener
+
+                // Gráfico desde caché si aún no hay datos pintados
+                if (glucoseChart.data == null || glucoseChart.data.entryCount == 0) {
+                    val entries = readings.map { (fecha, valor, _) ->
+                        Entry((fecha / 60_000L).toFloat(), valor.toFloat())
+                    }
+                    val lineColor = Color.parseColor("#29B6F6")
+                    val dataSet = LineDataSet(entries, "Glucosa").apply {
+                        color = lineColor; lineWidth = 2.5f
+                        setDrawCircles(false); setDrawValues(false)
+                        mode = LineDataSet.Mode.CUBIC_BEZIER; cubicIntensity = 0.2f
+                        setDrawFilled(true); fillColor = lineColor; fillAlpha = 40
+                    }
+                    glucoseChart.xAxis.setDrawLabels(true)
+                    glucoseChart.data = LineData(dataSet)
+                    glucoseChart.invalidate()
+                }
+
+                // Último valor desde caché si aún no se ha leído online
+                if (lastKnownReading == null) {
+                    val (fecha, valor, trend) = readings.last()
+                    val ts = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(fecha))
+                    val cached = GlucoseMeasurement(value = valor, trendArrow = trend, timestamp = ts)
+                    lastKnownReading = cached
+                    tvGlucosa.alpha = 0.55f
+                    updateGlucoseCard(valor.toDouble(), trend, stale = true)
+                    tvLastUpdated.text = "Caché · ${formatStaleLabel(cached)}"
+                    intentarMostrarPrediccion()
+                }
+            }
+    }
+
+    private fun formatStaleLabel(m: GlucoseMeasurement): String {
+        val millis = parseTimestampToMillis(m.timestamp) ?: return "dato anterior"
+        val now = System.currentTimeMillis()
+        val sameDay = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).run {
+            format(Date(millis)) == format(Date(now))
+        }
+        val fmt = if (sameDay) SimpleDateFormat("HH:mm", Locale.getDefault())
+                  else SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
+        return "última lectura ${fmt.format(Date(millis))}"
     }
 
     // ── Gráfica ──────────────────────────────────────────────────────────────
