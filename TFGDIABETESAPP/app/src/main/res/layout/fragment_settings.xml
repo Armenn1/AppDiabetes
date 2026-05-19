@@ -428,14 +428,13 @@
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Contraseña de LibreLinkUp"
-                        app:endIconMode="password_toggle">
+                        android:hint="Contraseña de LibreLinkUp">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etLibrePassword"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textVisiblePassword" />
+                            android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
