@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.example.tfg_diabetesapp.LibreCredentialsStore
 import com.example.tfg_diabetesapp.PerfilHorario
 import com.example.tfg_diabetesapp.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -205,7 +206,9 @@ class SettingsFragment : Fragment() {
             "objetivoMin" to objetivoMin,
             "objetivoMax" to objetivoMax,
             "libreEmail" to libreEmailText,
-            "librePassword" to librePasswordText,
+            // La contraseña NO se guarda en Firestore (riesgo de exposición en texto plano).
+            // Se almacena cifrada localmente con EncryptedSharedPreferences.
+            "librePassword" to com.google.firebase.firestore.FieldValue.delete(),
             "diaHoras" to diaDesdeOpcion(insulinaText, etDiaPersonalizado.text.toString()),
             "insulinaPeakMin" to peakDesdeOpcion(insulinaText),
             "insulinaRapidaNombre" to insulinaText,
@@ -222,6 +225,10 @@ class SettingsFragment : Fragment() {
         actvTipoDiabetes.text.toString().takeIf { it.isNotEmpty() }?.let { data["tipoDiabetes"] = it }
         actvInsulinaBasal.text.toString().takeIf { it.isNotEmpty() }?.let { data["insulinaBasal"] = it }
         etDosisBasal.text.toString().toDoubleOrNull()?.let { data["dosisBasal"] = it }
+
+        if (librePasswordText.isNotEmpty()) {
+            LibreCredentialsStore.setPassword(requireContext(), librePasswordText)
+        }
 
         db.collection("users").document(userId)
             .set(data, SetOptions.merge())
@@ -248,7 +255,15 @@ class SettingsFragment : Fragment() {
                 val objetivoMin = document.getDouble("objetivoMin") ?: legacyTarget ?: 70.0
                 val objetivoMax = document.getDouble("objetivoMax") ?: 180.0
                 val libreEmail = document.getString("libreEmail") ?: ""
-                val librePassword = document.getString("librePassword") ?: ""
+                // Migración: si todavía hay contraseña en Firestore (legacy),
+                // la trasladamos al almacén cifrado local y la borramos remotamente.
+                val legacyRemotePassword = document.getString("librePassword")
+                if (!legacyRemotePassword.isNullOrEmpty()) {
+                    LibreCredentialsStore.setPassword(requireContext(), legacyRemotePassword)
+                    db.collection("users").document(userId)
+                        .update("librePassword", com.google.firebase.firestore.FieldValue.delete())
+                }
+                val librePassword = LibreCredentialsStore.getPassword(requireContext())
                 val diaHoras = document.getDouble("diaHoras") ?: 5.0
                 val umbralBajo = document.getDouble("umbralBajo") ?: 70.0
                 val umbralAlto = document.getDouble("umbralAlto") ?: 180.0

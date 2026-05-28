@@ -143,6 +143,8 @@ class HomeFragment : Fragment() {
                 .setMessage("¿Seguro que quieres cerrar sesión?")
                 .setPositiveButton("Cerrar sesión") { _, _ ->
                     GlucoseSyncWorker.cancel(requireContext().applicationContext)
+                    com.example.tfg_diabetesapp.LibreCredentialsStore
+                        .clear(requireContext().applicationContext)
                     auth.signOut()
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -272,7 +274,8 @@ class HomeFragment : Fragment() {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 val newEmail = document.getString("libreEmail") ?: ""
-                val newPassword = document.getString("librePassword") ?: ""
+                val newPassword = com.example.tfg_diabetesapp.LibreCredentialsStore
+                    .getPassword(requireContext())
                 diaHoras = document.getDouble("diaHoras") ?: 5.0
                 peakMin  = (document.getLong("insulinaPeakMin") ?: 75L).toInt()
                 sensibilidad = document.getDouble("sensibilidad") ?: 0.0

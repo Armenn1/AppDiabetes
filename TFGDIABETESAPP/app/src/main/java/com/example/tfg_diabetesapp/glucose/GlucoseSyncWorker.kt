@@ -9,6 +9,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.example.tfg_diabetesapp.LibreCredentialsStore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -30,7 +31,7 @@ class GlucoseSyncWorker(
         return try {
             val userDoc = db.collection("users").document(userId).get().await()
             val email = userDoc.getString("libreEmail").orEmpty()
-            val pass = userDoc.getString("librePassword").orEmpty()
+            val pass = LibreCredentialsStore.getPassword(applicationContext)
             if (email.isEmpty() || pass.isEmpty()) {
                 Log.d(TAG, "Sin credenciales LibreLinkUp, abort")
                 return Result.success()
