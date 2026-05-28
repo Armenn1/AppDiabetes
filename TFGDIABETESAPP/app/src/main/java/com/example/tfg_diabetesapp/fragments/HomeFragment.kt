@@ -25,6 +25,7 @@ import com.example.tfg_diabetesapp.BoloActivity
 import com.example.tfg_diabetesapp.BoloLog
 import com.example.tfg_diabetesapp.CarbsCalculator
 import com.example.tfg_diabetesapp.FoodScanResult
+import com.example.tfg_diabetesapp.GlucosePredictionModel
 import com.example.tfg_diabetesapp.IobCalculator
 import com.example.tfg_diabetesapp.LoginActivity
 import com.example.tfg_diabetesapp.MainActivity
@@ -46,6 +47,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -88,6 +90,12 @@ class HomeFragment : Fragment() {
     private var alarmasActivas: Boolean = false
     private var perfiles: List<PerfilHorario> = emptyList()
 
+    private var iobActual: Double = 0.0
+    private var cobActual: Double = 0.0
+    private var sensibilidad: Double = 0.0
+    private var factorHC: Double = 0.0
+    private var grasasUltimaComida: Double = 0.0
+
     private var lastKnownReading: GlucoseMeasurement? = null
 
     private val notifPermissionLauncher = registerForActivityResult(
@@ -117,6 +125,7 @@ class HomeFragment : Fragment() {
         setGreeting()
         createNotificationChannel()
         setupGlucoseChart()
+        loadGlucoseCacheFromFirestore()
 
         cardNewBolo.setOnClickListener {
             val intent = Intent(requireContext(), BoloActivity::class.java)
@@ -186,9 +195,64 @@ class HomeFragment : Fragment() {
                     )
                 }
                 val cob = CarbsCalculator.calcular(scans)
+                cobActual = cob
+                grasasUltimaComida = scans.maxByOrNull { it.fecha }?.grasas ?: 0.0
                 tvCOB.text = "${(cob * 10).roundToInt() / 10.0} g"
+                intentarMostrarPrediccion()
             }
             .addOnFailureListener { tvCOB.text = "0 g" }
+    }
+
+    private fun intentarMostrarPrediccion() {
+        if (sensibilidad <= 0 || factorHC <= 0) return
+        if (iobActual <= 0 && cobActual <= 0) return
+        val ultima = lastKnownReading ?: return
+
+        val prediccion = GlucosePredictionModel.predecir(
+            glucosaActual       = ultima.value.toDouble(),
+            iobActual           = iobActual,
+            cobGramos           = cobActual,
+            grasasUltimaComida  = grasasUltimaComida,
+            sensibilidad        = sensibilidad,
+            factorHC            = factorHC,
+            diaMinutos          = (diaHoras * 60).toInt(),
+            minutosMax          = 180
+        )
+
+        agregarPrediccionAGrafica(prediccion)
+    }
+
+    private fun agregarPrediccionAGrafica(prediccion: List<Pair<Int, Double>>) {
+        val ahoraMin = System.currentTimeMillis() / 60_000L
+        val entries = prediccion.map { (deltaMin, glucosa) ->
+            Entry((ahoraMin + deltaMin).toFloat(), glucosa.toFloat())
+        }
+
+        val predDataSet = LineDataSet(entries, "Predicción").apply {
+            color = Color.parseColor("#FF9800")
+            lineWidth = 2f
+            setDrawCircles(false)
+            setDrawValues(false)
+            enableDashedLine(15f, 8f, 0f)
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            cubicIntensity = 0.15f
+            setDrawFilled(false)
+        }
+
+        val currentData = glucoseChart.data
+        if (currentData != null) {
+            val existing = currentData.dataSets.find { it.label == "Predicción" }
+            if (existing != null) currentData.removeDataSet(existing)
+            currentData.addDataSet(predDataSet)
+            currentData.notifyDataChanged()
+            glucoseChart.notifyDataSetChanged()
+        } else {
+            glucoseChart.data = LineData(predDataSet)
+        }
+
+        glucoseChart.legend.isEnabled = true
+        glucoseChart.legend.textSize = 11f
+        glucoseChart.invalidate()
     }
 
     // ── Saludo dinámico ──────────────────────────────────────────────────────
@@ -211,6 +275,8 @@ class HomeFragment : Fragment() {
                 val newPassword = document.getString("librePassword") ?: ""
                 diaHoras = document.getDouble("diaHoras") ?: 5.0
                 peakMin  = (document.getLong("insulinaPeakMin") ?: 75L).toInt()
+                sensibilidad = document.getDouble("sensibilidad") ?: 0.0
+                factorHC     = document.getDouble("factorHC")     ?: 0.0
 
                 val newUmbralBajo = (document.getDouble("umbralBajo") ?: 70.0).toFloat()
                 val newUmbralAlto = (document.getDouble("umbralAlto") ?: 180.0).toFloat()
@@ -276,15 +342,17 @@ class HomeFragment : Fragment() {
                 tvLastUpdated.text = "Última act. $hora"
                 checkGlucoseAlert(measurement.value)
                 saveGlucoseReading(measurement)
+                intentarMostrarPrediccion()
             } else if (lastKnownReading != null) {
                 tvGlucosa.alpha = 0.55f
                 updateGlucoseCard(lastKnownReading!!.value.toDouble(), lastKnownReading!!.trendArrow, stale = true)
-                tvLastUpdated.text = "Sin conexión · dato anterior"
+                tvLastUpdated.text = "Sin conexión · ${formatStaleLabel(lastKnownReading!!)}"
             } else {
                 tvGlucosa.text = "--"
                 tvTendencia.text = ""
                 tvGlucosa.alpha = 1f
                 tvLastUpdated.text = "Sin conexión"
+                loadGlucoseCacheFromFirestore()
             }
         }
     }
@@ -372,6 +440,69 @@ class HomeFragment : Fragment() {
         }
 
         if (count > 0) batch.commit()
+    }
+
+    // ── Caché local (Firestore) ──────────────────────────────────────────────
+
+    private fun loadGlucoseCacheFromFirestore() {
+        val userId = auth.currentUser?.uid ?: return
+        val since = System.currentTimeMillis() - 24 * 3_600_000L
+        db.collection("users").document(userId).collection("glucoseReadings")
+            .whereGreaterThan("fecha", since)
+            .orderBy("fecha", Query.Direction.ASCENDING)
+            .limit(500)
+            .get()
+            .addOnSuccessListener { docs ->
+                if (docs.isEmpty) return@addOnSuccessListener
+                val readings = docs.mapNotNull { d ->
+                    val fecha = d.getLong("fecha") ?: return@mapNotNull null
+                    val valor = (d.getLong("valor") ?: d.getDouble("valor")?.toLong())?.toInt()
+                        ?: return@mapNotNull null
+                    val trend = (d.getLong("tendencia") ?: 0L).toInt()
+                    Triple(fecha, valor, trend)
+                }
+                if (readings.isEmpty()) return@addOnSuccessListener
+
+                // Gráfico desde caché si aún no hay datos pintados
+                if (glucoseChart.data == null || glucoseChart.data.entryCount == 0) {
+                    val entries = readings.map { (fecha, valor, _) ->
+                        Entry((fecha / 60_000L).toFloat(), valor.toFloat())
+                    }
+                    val lineColor = Color.parseColor("#29B6F6")
+                    val dataSet = LineDataSet(entries, "Glucosa").apply {
+                        color = lineColor; lineWidth = 2.5f
+                        setDrawCircles(false); setDrawValues(false)
+                        mode = LineDataSet.Mode.CUBIC_BEZIER; cubicIntensity = 0.2f
+                        setDrawFilled(true); fillColor = lineColor; fillAlpha = 40
+                    }
+                    glucoseChart.xAxis.setDrawLabels(true)
+                    glucoseChart.data = LineData(dataSet)
+                    glucoseChart.invalidate()
+                }
+
+                // Último valor desde caché si aún no se ha leído online
+                if (lastKnownReading == null) {
+                    val (fecha, valor, trend) = readings.last()
+                    val ts = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(fecha))
+                    val cached = GlucoseMeasurement(value = valor, trendArrow = trend, timestamp = ts)
+                    lastKnownReading = cached
+                    tvGlucosa.alpha = 0.55f
+                    updateGlucoseCard(valor.toDouble(), trend, stale = true)
+                    tvLastUpdated.text = "Caché · ${formatStaleLabel(cached)}"
+                    intentarMostrarPrediccion()
+                }
+            }
+    }
+
+    private fun formatStaleLabel(m: GlucoseMeasurement): String {
+        val millis = parseTimestampToMillis(m.timestamp) ?: return "dato anterior"
+        val now = System.currentTimeMillis()
+        val sameDay = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).run {
+            format(Date(millis)) == format(Date(now))
+        }
+        val fmt = if (sameDay) SimpleDateFormat("HH:mm", Locale.getDefault())
+                  else SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
+        return "última lectura ${fmt.format(Date(millis))}"
     }
 
     // ── Gráfica ──────────────────────────────────────────────────────────────
@@ -463,6 +594,7 @@ class HomeFragment : Fragment() {
         }
         glucoseChart.data = LineData(dataSet)
         glucoseChart.invalidate()
+        intentarMostrarPrediccion()
     }
 
     // ── IOB ──────────────────────────────────────────────────────────────────
@@ -477,7 +609,9 @@ class HomeFragment : Fragment() {
                     BoloLog(fecha = doc.getLong("fecha") ?: 0L, dosisTotal = doc.getDouble("dosisTotal") ?: 0.0)
                 }
                 val iob = IobCalculator.calcular(logs, (diaHoras * 60).toInt(), peakMin)
+                iobActual = iob
                 tvIOB.text = "${(iob * 10.0).roundToInt() / 10.0} U"
+                intentarMostrarPrediccion()
             }
             .addOnFailureListener { tvIOB.text = "0.0 U" }
     }
