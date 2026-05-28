@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:79649446951:android:8d663a39e2e7b98fe5c202",
+        "android_client_info": {
+          "package_name": "com.diabetly.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEFp5MFU78f3gWcDCeTa3UQ6nmqp2id9Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:79649446951:android:0831d8e54c0c8f1ae5c202",
         "android_client_info": {
           "package_name": "com.example.tfg_diabetesapp"

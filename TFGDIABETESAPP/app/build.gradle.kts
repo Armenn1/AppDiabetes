@@ -12,13 +12,13 @@ val localProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.example.tfg_diabetesapp"
+    namespace = "com.diabetly.app"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.tfg_diabetesapp"
+        applicationId = "com.diabetly.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

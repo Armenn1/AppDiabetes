@@ -9,7 +9,7 @@
     android:background="@color/color_background"
     tools:context=".fragments.HomeFragment">
 
-    <com.example.tfg_diabetesapp.widgets.MedicalHeaderView
+    <com.diabetly.app.widgets.MedicalHeaderView
         android:id="@+id/homeHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

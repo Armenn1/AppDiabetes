@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@color/color_background">
 
-    <com.example.tfg_diabetesapp.widgets.MedicalHeaderView
+    <com.diabetly.app.widgets.MedicalHeaderView
         android:id="@+id/activityHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
